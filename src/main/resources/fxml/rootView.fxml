@@ -19,6 +19,7 @@
       <MenuBar BorderPane.alignment="CENTER">
          <Menu text="Archivo">
             <MenuItem onAction="#handleNuevoVehiculo" text="Nuevo Vehículo" />
+            <MenuItem onAction="#handleCerrarSesion" text="Cerrar Sesión" />
             <MenuItem onAction="#handleSalir" text="Salir" />
          </Menu>
          <Menu text="Vehículos">
@@ -55,6 +56,7 @@
                   <Button maxWidth="Infinity" onAction="#handleNuevoVehiculo" text="Nuevo Vehículo" HBox.hgrow="ALWAYS" />
                   <Button maxWidth="Infinity" onAction="#handleEditarVehiculo" text="Editar" HBox.hgrow="ALWAYS" />
                   <Button maxWidth="Infinity" onAction="#handleEliminarVehiculo" text="Eliminar" HBox.hgrow="ALWAYS" />
+                  <Button maxWidth="Infinity" onAction="#handleActualizarVehiculos" text="Actualizar" HBox.hgrow="ALWAYS" />
                </HBox>
             </VBox>
          </Tab>
@@ -68,9 +70,10 @@
                   <columns>
                      <TableColumn fx:id="fechaColumn" prefWidth="100.0" text="Fecha" />
                      <TableColumn fx:id="vehiculoColumn" prefWidth="120.0" text="Vehículo" />
-                     <TableColumn fx:id="descripcionColumn" prefWidth="200.0" text="Descripción" />
+                     <TableColumn fx:id="descripcionColumn" prefWidth="180.0" text="Descripción" />
                      <TableColumn fx:id="costoColumn" prefWidth="80.0" text="Costo" />
-                     <TableColumn fx:id="tallerColumn" prefWidth="150.0" text="Taller" />
+                     <TableColumn fx:id="tallerColumn" prefWidth="120.0" text="Taller" />
+                     <TableColumn fx:id="estadoColumn" prefWidth="100.0" text="Estado" />
                   </columns>
                </TableView>
                <HBox spacing="10.0">
@@ -80,6 +83,7 @@
                   <Button maxWidth="Infinity" onAction="#handleNuevaReparacion" text="Nueva Reparación" HBox.hgrow="ALWAYS" />
                   <Button maxWidth="Infinity" onAction="#handleEditarReparacion" text="Editar" HBox.hgrow="ALWAYS" />
                   <Button maxWidth="Infinity" onAction="#handleEliminarReparacion" text="Eliminar" HBox.hgrow="ALWAYS" />
+                  <Button maxWidth="Infinity" onAction="#handleActualizarReparaciones" text="Actualizar" HBox.hgrow="ALWAYS" />
                </HBox>
             </VBox>
          </Tab>

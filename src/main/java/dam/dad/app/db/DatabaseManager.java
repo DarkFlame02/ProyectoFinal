@@ -5,13 +5,22 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import org.mindrot.jbcrypt.BCrypt;
+
+import dam.dad.app.model.Vehiculo;
+import dam.dad.app.model.Reparacion;
+import dam.dad.app.model.Taller;
 
 public class DatabaseManager {
     private static final String PROPERTIES_FILE = "/database.properties";
     private static DatabaseManager instance;
     private Connection connection;
+    private int currentUserId = -1; // Para almacenar el ID del usuario autenticado
 
     private DatabaseManager() {
         try {
@@ -70,17 +79,302 @@ public class DatabaseManager {
     }
 
     public boolean validateUser(String username, String password) {
-        String sql = "SELECT password FROM usuarios WHERE username = ?";
+        String sql = "SELECT id, password FROM usuarios WHERE username = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String hashedPassword = rs.getString("password");
-                return BCrypt.checkpw(password, hashedPassword);
+                boolean valid = BCrypt.checkpw(password, hashedPassword);
+                if (valid) {
+                    currentUserId = rs.getInt("id");
+                }
+                return valid;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
+    }
+    
+    public int getCurrentUserId() {
+        return currentUserId;
+    }
+    
+    public void logout() {
+        currentUserId = -1;
+    }
+    
+    // MÉTODOS PARA GESTIONAR VEHÍCULOS
+    
+    public List<Vehiculo> getVehiculosByUsuario() {
+        List<Vehiculo> vehiculos = new ArrayList<>();
+        String sql = "SELECT * FROM vehiculos WHERE usuario_id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, currentUserId);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Vehiculo vehiculo = new Vehiculo();
+                vehiculo.setId(rs.getInt("id"));
+                vehiculo.setUsuarioId(rs.getInt("usuario_id"));
+                vehiculo.setMarca(rs.getString("marca"));
+                vehiculo.setModelo(rs.getString("modelo"));
+                vehiculo.setMatricula(rs.getString("matricula"));
+                vehiculo.setAnio(rs.getInt("anio"));
+                vehiculo.setKilometros(rs.getInt("kilometros"));
+                
+                // Cargar reparaciones del vehículo
+                vehiculo.setReparaciones(getReparacionesByVehiculo(vehiculo.getId()));
+                
+                vehiculos.add(vehiculo);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return vehiculos;
+    }
+    
+    public Vehiculo getVehiculoById(int vehiculoId) {
+        String sql = "SELECT * FROM vehiculos WHERE id = ? AND usuario_id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, vehiculoId);
+            stmt.setInt(2, currentUserId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                Vehiculo vehiculo = new Vehiculo();
+                vehiculo.setId(rs.getInt("id"));
+                vehiculo.setUsuarioId(rs.getInt("usuario_id"));
+                vehiculo.setMarca(rs.getString("marca"));
+                vehiculo.setModelo(rs.getString("modelo"));
+                vehiculo.setMatricula(rs.getString("matricula"));
+                vehiculo.setAnio(rs.getInt("anio"));
+                vehiculo.setKilometros(rs.getInt("kilometros"));
+                
+                // Cargar reparaciones del vehículo
+                vehiculo.setReparaciones(getReparacionesByVehiculo(vehiculo.getId()));
+                
+                return vehiculo;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public boolean addVehiculo(Vehiculo vehiculo) {
+        String sql = "INSERT INTO vehiculos (usuario_id, marca, modelo, matricula, anio, kilometros) VALUES (?, ?, ?, ?, ?, ?)";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, currentUserId);
+            stmt.setString(2, vehiculo.getMarca());
+            stmt.setString(3, vehiculo.getModelo());
+            stmt.setString(4, vehiculo.getMatricula());
+            stmt.setInt(5, vehiculo.getAnio());
+            stmt.setInt(6, vehiculo.getKilometros());
+            
+            int affectedRows = stmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    vehiculo.setId(generatedKeys.getInt(1));
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    public boolean updateVehiculo(Vehiculo vehiculo) {
+        String sql = "UPDATE vehiculos SET marca = ?, modelo = ?, matricula = ?, anio = ?, kilometros = ? WHERE id = ? AND usuario_id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, vehiculo.getMarca());
+            stmt.setString(2, vehiculo.getModelo());
+            stmt.setString(3, vehiculo.getMatricula());
+            stmt.setInt(4, vehiculo.getAnio());
+            stmt.setInt(5, vehiculo.getKilometros());
+            stmt.setInt(6, vehiculo.getId());
+            stmt.setInt(7, currentUserId);
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    public boolean deleteVehiculo(int vehiculoId) {
+        // Primero eliminamos todas las reparaciones asociadas
+        String sqlDeleteReparaciones = "DELETE FROM reparaciones WHERE vehiculo_id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sqlDeleteReparaciones)) {
+            stmt.setInt(1, vehiculoId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        
+        // Luego eliminamos el vehículo
+        String sqlDeleteVehiculo = "DELETE FROM vehiculos WHERE id = ? AND usuario_id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sqlDeleteVehiculo)) {
+            stmt.setInt(1, vehiculoId);
+            stmt.setInt(2, currentUserId);
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    // MÉTODOS PARA GESTIONAR REPARACIONES
+    
+    public List<Reparacion> getReparacionesByVehiculo(int vehiculoId) {
+        List<Reparacion> reparaciones = new ArrayList<>();
+        String sql = "SELECT * FROM reparaciones WHERE vehiculo_id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, vehiculoId);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Reparacion reparacion = new Reparacion();
+                reparacion.setId(rs.getInt("id"));
+                reparacion.setVehiculoId(rs.getInt("vehiculo_id"));
+                reparacion.setTallerId(rs.getInt("taller_id"));
+                reparacion.setDescripcion(rs.getString("descripcion"));
+                reparacion.setFechaReparacion(rs.getDate("fecha_reparacion").toLocalDate());
+                reparacion.setCosto(rs.getDouble("costo"));
+                reparacion.setEstado(rs.getString("estado"));
+                
+                reparaciones.add(reparacion);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return reparaciones;
+    }
+    
+    public boolean addReparacion(Reparacion reparacion) {
+        String sql = "INSERT INTO reparaciones (vehiculo_id, taller_id, descripcion, fecha_reparacion, costo, estado) VALUES (?, ?, ?, ?, ?, ?)";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, reparacion.getVehiculoId());
+            stmt.setInt(2, reparacion.getTallerId());
+            stmt.setString(3, reparacion.getDescripcion());
+            stmt.setObject(4, reparacion.getFechaReparacion());
+            stmt.setDouble(5, reparacion.getCosto());
+            stmt.setString(6, reparacion.getEstado());
+            
+            int affectedRows = stmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    reparacion.setId(generatedKeys.getInt(1));
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    public boolean updateReparacion(Reparacion reparacion) {
+        String sql = "UPDATE reparaciones SET taller_id = ?, descripcion = ?, fecha_reparacion = ?, costo = ?, estado = ? WHERE id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, reparacion.getTallerId());
+            stmt.setString(2, reparacion.getDescripcion());
+            stmt.setObject(3, reparacion.getFechaReparacion());
+            stmt.setDouble(4, reparacion.getCosto());
+            stmt.setString(5, reparacion.getEstado());
+            stmt.setInt(6, reparacion.getId());
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    public boolean deleteReparacion(int reparacionId) {
+        String sql = "DELETE FROM reparaciones WHERE id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, reparacionId);
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    // MÉTODOS PARA GESTIONAR TALLERES
+    
+    public List<Taller> getAllTalleres() {
+        List<Taller> talleres = new ArrayList<>();
+        String sql = "SELECT * FROM talleres WHERE activo = TRUE";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Taller taller = new Taller();
+                taller.setId(rs.getInt("id"));
+                taller.setNombre(rs.getString("nombre"));
+                taller.setDireccion(rs.getString("direccion"));
+                taller.setTelefono(rs.getString("telefono"));
+                taller.setEmail(rs.getString("email"));
+                taller.setEspecialidad(rs.getString("especialidad"));
+                taller.setActivo(rs.getBoolean("activo"));
+                
+                // Calcular valoración promedio
+                taller.setValoracionPromedio(calcularValoracionPromedio(taller.getId()));
+                
+                talleres.add(taller);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return talleres;
+    }
+    
+    public double calcularValoracionPromedio(int tallerId) {
+        String sql = "SELECT AVG(puntuacion) AS promedio FROM valoraciones WHERE taller_id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, tallerId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getDouble("promedio");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return 0.0;
     }
 } 
