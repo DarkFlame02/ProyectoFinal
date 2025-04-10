@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox spacing="15" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" 
+<VBox spacing="10" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" 
      fx:controller="dam.dad.app.controller.ReparacionController">
    
    <TableView fx:id="reparacionesTable" VBox.vgrow="ALWAYS">
@@ -18,14 +18,17 @@
       <columnResizePolicy>
          <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
       </columnResizePolicy>
+      <placeholder>
+         <Label text="No hay reparaciones registradas para este vehículo" />
+      </placeholder>
    </TableView>
    
-   <HBox spacing="15" alignment="CENTER">
+   <HBox spacing="10" alignment="CENTER">
       <padding>
-         <Insets top="10" />
+         <Insets top="8" />
       </padding>
-      <Button text="Nueva" onAction="#handleNuevaReparacion" prefWidth="90" prefHeight="30" />
-      <Button text="Editar" onAction="#handleEditarReparacion" prefWidth="90" prefHeight="30" />
-      <Button text="Eliminar" onAction="#handleEliminarReparacion" prefWidth="90" prefHeight="30" />
+      <Button text="Nueva" onAction="#handleNuevaReparacion" prefWidth="80" prefHeight="25" />
+      <Button text="Editar" onAction="#handleEditarReparacion" prefWidth="80" prefHeight="25" />
+      <Button text="Eliminar" onAction="#handleEliminarReparacion" prefWidth="80" prefHeight="25" />
    </HBox>
 </VBox> 

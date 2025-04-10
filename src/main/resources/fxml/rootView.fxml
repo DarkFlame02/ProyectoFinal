@@ -1,55 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" 
-           fx:controller="dam.dad.app.controller.RootController">
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dam.dad.app.controller.RootController">
    <top>
-      <VBox spacing="5">
+      <VBox>
          <MenuBar>
             <Menu text="Archivo">
-               <MenuItem text="Actualizar datos" onAction="#handleActualizarDatos" />
+               <MenuItem onAction="#handleActualizarDatos" text="Actualizar datos" />
                <SeparatorMenuItem />
-               <MenuItem text="Cerrar sesión" onAction="#handleCerrarSesion" />
-               <MenuItem text="Salir" onAction="#handleSalir" />
+               <MenuItem onAction="#handleCerrarSesion" text="Cerrar sesión" />
+               <MenuItem onAction="#handleSalir" text="Salir" />
             </Menu>
             <Menu text="Vistas">
-               <MenuItem text="Vehículos y Reparaciones" onAction="#handleMostrarVehiculos" />
-               <MenuItem text="Talleres" onAction="#handleMostrarTalleres" />
-               <MenuItem text="Informes" onAction="#handleMostrarInformes" />
+               <MenuItem onAction="#handleMostrarVehiculos" text="Vehículos y Reparaciones" />
+               <MenuItem onAction="#handleMostrarTalleres" text="Talleres" />
+               <MenuItem onAction="#handleMostrarInformes" text="Informes" />
             </Menu>
          </MenuBar>
          
          <ToolBar>
-            <Button text="Vehículos" onAction="#handleMostrarVehiculos">
+            <Button onAction="#handleMostrarVehiculos" text="Vehículos">
                <tooltip>
                   <Tooltip text="Gestionar vehículos y reparaciones" />
                </tooltip>
             </Button>
-            <Button text="Talleres" onAction="#handleMostrarTalleres">
+            <Button onAction="#handleMostrarTalleres" text="Talleres">
                <tooltip>
                   <Tooltip text="Gestionar talleres y valoraciones" />
                </tooltip>
             </Button>
-            <Button text="Informes" onAction="#handleMostrarInformes">
+            <Button onAction="#handleMostrarInformes" text="Informes">
                <tooltip>
                   <Tooltip text="Ver informes y estadísticas" />
                </tooltip>
             </Button>
             <Separator orientation="VERTICAL" />
-            <Button text="Actualizar" onAction="#handleActualizarDatos">
+            <Button onAction="#handleActualizarDatos" text="Actualizar">
                <tooltip>
                   <Tooltip text="Actualizar datos" />
                </tooltip>
             </Button>
             <Separator orientation="VERTICAL" />
-            <Button text="Cerrar sesión" onAction="#handleCerrarSesion">
-               <tooltip>
-                  <Tooltip text="Cerrar sesión actual" />
-               </tooltip>
-            </Button>
+            <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+               <Label fx:id="tituloSeccionLabel" style="-fx-font-size: 14; -fx-font-weight: bold;" text="Vehículos y Reparaciones" />
+               <padding>
+                  <Insets right="15" />
+               </padding>
+            </HBox>
          </ToolBar>
       </VBox>
    </top>
@@ -57,13 +67,4 @@
    <center>
       <!-- Aquí se cargarán dinámicamente las vistas -->
    </center>
-   
-   <bottom>
-      <HBox spacing="5" alignment="CENTER_RIGHT">
-         <padding>
-            <Insets top="5" right="10" bottom="5" left="10" />
-         </padding>
-         <Label text="Gestión de Reparaciones de Vehículos" />
-      </HBox>
-   </bottom>
 </BorderPane>

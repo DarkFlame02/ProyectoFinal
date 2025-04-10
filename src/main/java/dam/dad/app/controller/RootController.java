@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -18,6 +19,9 @@ public class RootController {
     @FXML
     private BorderPane root;
     
+    @FXML
+    private Label tituloSeccionLabel;
+    
     private Stage primaryStage;
     private DatabaseManager dbManager;
     
@@ -25,6 +29,7 @@ public class RootController {
     private VehiculoController vehiculoController;
     private ReparacionController reparacionController;
     private TallerController tallerController;
+    private InformesController informesController;
     
     // Vistas cargadas
     private Parent vehiculosView;
@@ -57,6 +62,7 @@ public class RootController {
             // Cargar vista de informes
             FXMLLoader informesLoader = new FXMLLoader(getClass().getResource("/fxml/InformesView.fxml"));
             informesView = informesLoader.load();
+            informesController = informesLoader.getController();
             
             // Obtener el controlador de reparaciones
             reparacionController = vehiculoController.getReparacionController();
@@ -70,32 +76,38 @@ public class RootController {
     private void mostrarVistaPrincipal() {
         // Por defecto, muestra la vista de vehículos y reparaciones
         root.setCenter(vehiculosView);
+        tituloSeccionLabel.setText("Vehículos y Reparaciones");
     }
-    
+
     @FXML
     public void handleMostrarVehiculos() {
         root.setCenter(vehiculosView);
+        tituloSeccionLabel.setText("Vehículos y Reparaciones");
         primaryStage.setTitle("Gestión de Reparaciones de Vehículos - Vehículos y Reparaciones");
     }
-    
+
     @FXML
     public void handleMostrarTalleres() {
         root.setCenter(talleresView);
+        tituloSeccionLabel.setText("Catálogo de Talleres Colaboradores");
         primaryStage.setTitle("Gestión de Reparaciones de Vehículos - Talleres");
     }
-    
+
     @FXML
     public void handleMostrarInformes() {
+        // Actualizar datos de informes antes de mostrar
+        informesController.cargarInformes();
         root.setCenter(informesView);
+        tituloSeccionLabel.setText("Informes y Estadísticas");
         primaryStage.setTitle("Gestión de Reparaciones de Vehículos - Informes");
     }
-    
+
     @FXML
     public void handleActualizarDatos() {
         vehiculoController.cargarVehiculos();
         tallerController.cargarTalleres();
     }
-    
+
     @FXML
     public void handleCerrarSesion() {
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
@@ -122,7 +134,7 @@ public class RootController {
             }
         }
     }
-    
+
     @FXML
     public void handleSalir() {
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);

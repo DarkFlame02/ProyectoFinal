@@ -4,22 +4,20 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox spacing="15" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" 
+<VBox spacing="10" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" 
      fx:controller="dam.dad.app.controller.TallerController">
    
    <padding>
-      <Insets top="20" right="20" bottom="20" left="20" />
+      <Insets top="0" right="0" bottom="0" left="0" />
    </padding>
    
-   <Label text="Gestión de Talleres y Valoraciones" style="-fx-font-size: 18; -fx-font-weight: bold;" />
-   
    <SplitPane dividerPositions="0.5" VBox.vgrow="ALWAYS">
-      <VBox spacing="15">
+      <VBox spacing="10">
          <padding>
-            <Insets top="10" right="10" bottom="10" left="10" />
+            <Insets top="8" right="8" bottom="8" left="8" />
          </padding>
          
-         <Label text="Talleres" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+         <Label text="Talleres Disponibles" style="-fx-font-size: 14; -fx-font-weight: bold;" />
          
          <TableView fx:id="talleresTable" VBox.vgrow="ALWAYS">
             <columns>
@@ -31,24 +29,19 @@
             <columnResizePolicy>
                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
+            <placeholder>
+               <Label text="No hay talleres colaboradores en su zona" />
+            </placeholder>
          </TableView>
          
-         <HBox spacing="15" alignment="CENTER">
-            <padding>
-                <Insets top="10" />
-            </padding>
-            <Button text="Nuevo" onAction="#handleNuevoTaller" prefWidth="90" prefHeight="30" />
-            <Button text="Editar" onAction="#handleEditarTaller" prefWidth="90" prefHeight="30" />
-            <Button text="Eliminar" onAction="#handleEliminarTaller" prefWidth="90" prefHeight="30" />
-         </HBox>
       </VBox>
       
-      <VBox spacing="15">
+      <VBox spacing="10">
          <padding>
-            <Insets top="10" right="10" bottom="10" left="10" />
+            <Insets top="8" right="8" bottom="8" left="8" />
          </padding>
          
-         <Label text="Valoraciones" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+         <Label text="Opiniones de Clientes" style="-fx-font-size: 14; -fx-font-weight: bold;" />
          
          <TableView fx:id="valoracionesTable" VBox.vgrow="ALWAYS">
             <columns>
@@ -58,13 +51,16 @@
             <columnResizePolicy>
                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
+            <placeholder>
+               <Label text="Seleccione un taller para ver opiniones" />
+            </placeholder>
          </TableView>
          
-         <HBox spacing="15" alignment="CENTER">
+         <HBox spacing="10" alignment="CENTER">
             <padding>
-                <Insets top="10" />
+                <Insets top="8" />
             </padding>
-            <Button text="Nueva Valoración" onAction="#handleNuevaValoracion" prefWidth="140" prefHeight="30" />
+            <Button text="Añadir Valoración" onAction="#handleNuevaValoracion" prefWidth="120" prefHeight="25" />
          </HBox>
       </VBox>
    </SplitPane>
