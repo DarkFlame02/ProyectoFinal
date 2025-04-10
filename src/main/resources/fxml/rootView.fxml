@@ -48,6 +48,9 @@
                      <TableColumn fx:id="anioColumn" prefWidth="80.0" text="Año" />
                      <TableColumn fx:id="kilometrosColumn" prefWidth="100.0" text="Kilómetros" />
                   </columns>
+                  <columnResizePolicy>
+                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                  </columnResizePolicy>
                </TableView>
                <HBox spacing="10.0">
                   <padding>
@@ -75,6 +78,9 @@
                      <TableColumn fx:id="tallerColumn" prefWidth="120.0" text="Taller" />
                      <TableColumn fx:id="estadoColumn" prefWidth="100.0" text="Estado" />
                   </columns>
+                  <columnResizePolicy>
+                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                  </columnResizePolicy>
                </TableView>
                <HBox spacing="10.0">
                   <padding>

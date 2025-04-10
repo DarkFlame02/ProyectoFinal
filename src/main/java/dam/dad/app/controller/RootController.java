@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import dam.dad.app.db.DatabaseManager;
 import dam.dad.app.model.Reparacion;
@@ -18,7 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Modality;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class RootController {
@@ -529,28 +530,244 @@ public class RootController {
 
     @FXML
     private void handleListarVehiculos() {
-        cargarVehiculos();
+        // Crear diálogo para opciones de listado
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Opciones de Listado");
+        dialog.setHeaderText("Selecciona las opciones de ordenación");
+
+        // Crear botones
+        ButtonType aplicarButtonType = new ButtonType("Aplicar", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(aplicarButtonType, ButtonType.CANCEL);
+
+        // Crear contenido del diálogo
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+
+        // Ordenación
+        Label ordenLabel = new Label("Ordenar por:");
+        ComboBox<String> ordenCombo = new ComboBox<>();
+        ordenCombo.getItems().addAll("Matrícula", "Marca", "Modelo", "Año", "Kilómetros");
+        ordenCombo.setValue("Matrícula");
+
+        // Dirección de ordenación
+        Label direccionLabel = new Label("Dirección:");
+        ComboBox<String> direccionCombo = new ComboBox<>();
+        direccionCombo.getItems().addAll("Ascendente", "Descendente");
+        direccionCombo.setValue("Ascendente");
+
+        // Añadir controles al grid
+        grid.add(ordenLabel, 0, 0);
+        grid.add(ordenCombo, 1, 0);
+        grid.add(direccionLabel, 0, 1);
+        grid.add(direccionCombo, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Mostrar diálogo y procesar resultado
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == aplicarButtonType) {
+                // Obtener vehículos
+                List<Vehiculo> vehiculos = dbManager.getVehiculosByUsuario();
+                
+                // Aplicar ordenación
+                String criterioOrden = ordenCombo.getValue();
+                boolean ascendente = direccionCombo.getValue().equals("Ascendente");
+                
+                vehiculos.sort((v1, v2) -> {
+                    int resultado = 0;
+                    switch (criterioOrden) {
+                        case "Matrícula":
+                            resultado = v1.getMatricula().compareTo(v2.getMatricula());
+                            break;
+                        case "Marca":
+                            resultado = v1.getMarca().compareTo(v2.getMarca());
+                            break;
+                        case "Modelo":
+                            resultado = v1.getModelo().compareTo(v2.getModelo());
+                            break;
+                        case "Año":
+                            resultado = Integer.compare(v1.getAnio(), v2.getAnio());
+                            break;
+                        case "Kilómetros":
+                            resultado = Integer.compare(v1.getKilometros(), v2.getKilometros());
+                            break;
+                    }
+                    return ascendente ? resultado : -resultado;
+                });
+                
+                // Actualizar la tabla
+                vehiculosData.clear();
+                vehiculosData.addAll(vehiculos);
+                vehiculosTable.setItems(vehiculosData);
+                
+                // Seleccionar el primer vehículo si hay alguno
+                if (!vehiculosData.isEmpty()) {
+                    vehiculosTable.getSelectionModel().select(0);
+                    mostrarReparacionesDeVehiculo(vehiculosData.get(0));
+                }
+            }
+        });
     }
 
     @FXML
     private void handleBuscarVehiculo() {
         // Crear diálogo para buscar vehículo
-        TextInputDialog dialog = new TextInputDialog();
+        Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Buscar Vehículo");
-        dialog.setHeaderText("Introduce la matrícula del vehículo");
-        dialog.setContentText("Matrícula:");
+        dialog.setHeaderText("Introduce los criterios de búsqueda");
+
+        // Crear botones
+        ButtonType buscarButtonType = new ButtonType("Buscar", ButtonBar.ButtonData.OK_DONE);
+        ButtonType limpiarButtonType = new ButtonType("Limpiar", ButtonBar.ButtonData.OTHER);
+        dialog.getDialogPane().getButtonTypes().addAll(buscarButtonType, limpiarButtonType, ButtonType.CANCEL);
+
+        // Crear contenido del diálogo
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new javafx.geometry.Insets(20, 20, 20, 20));
+
+        // Grupo de identificación
+        TitledPane identificacionPane = new TitledPane();
+        identificacionPane.setText("Identificación");
+        identificacionPane.setExpanded(true);
         
-        Optional<String> result = dialog.showAndWait();
+        GridPane identificacionGrid = new GridPane();
+        identificacionGrid.setHgap(10);
+        identificacionGrid.setVgap(10);
+        identificacionGrid.setPadding(new javafx.geometry.Insets(10, 10, 10, 10));
+
+        TextField matriculaField = new TextField();
+        matriculaField.setPromptText("Matrícula");
+        matriculaField.setPrefWidth(200);
         
-        result.ifPresent(matricula -> {
-            // Filtrar la lista de vehículos por la matrícula
-            vehiculosData.stream()
-                .filter(v -> v.getMatricula().toLowerCase().contains(matricula.toLowerCase()))
-                .findFirst()
-                .ifPresentOrElse(
-                    vehiculo -> vehiculosTable.getSelectionModel().select(vehiculo),
-                    () -> mostrarAlerta("Vehículo no encontrado", "No se encontró ningún vehículo con esa matrícula.")
-                );
+        TextField marcaField = new TextField();
+        marcaField.setPromptText("Marca");
+        marcaField.setPrefWidth(200);
+        
+        TextField modeloField = new TextField();
+        modeloField.setPromptText("Modelo");
+        modeloField.setPrefWidth(200);
+
+        identificacionGrid.add(new Label("Matrícula:"), 0, 0);
+        identificacionGrid.add(matriculaField, 1, 0);
+        identificacionGrid.add(new Label("Marca:"), 0, 1);
+        identificacionGrid.add(marcaField, 1, 1);
+        identificacionGrid.add(new Label("Modelo:"), 0, 2);
+        identificacionGrid.add(modeloField, 1, 2);
+
+        identificacionPane.setContent(identificacionGrid);
+
+        // Grupo de características
+        TitledPane caracteristicasPane = new TitledPane();
+        caracteristicasPane.setText("Características");
+        caracteristicasPane.setExpanded(true);
+        
+        GridPane caracteristicasGrid = new GridPane();
+        caracteristicasGrid.setHgap(10);
+        caracteristicasGrid.setVgap(10);
+        caracteristicasGrid.setPadding(new javafx.geometry.Insets(10, 10, 10, 10));
+
+        TextField anioField = new TextField();
+        anioField.setPromptText("Año");
+        anioField.setPrefWidth(200);
+        
+        TextField kilometrosField = new TextField();
+        kilometrosField.setPromptText("Kilómetros");
+        kilometrosField.setPrefWidth(200);
+
+        // Añadir validadores para campos numéricos
+        anioField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                anioField.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+        });
+
+        kilometrosField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                kilometrosField.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+        });
+
+        caracteristicasGrid.add(new Label("Año:"), 0, 0);
+        caracteristicasGrid.add(anioField, 1, 0);
+        caracteristicasGrid.add(new Label("Kilómetros:"), 0, 1);
+        caracteristicasGrid.add(kilometrosField, 1, 1);
+
+        caracteristicasPane.setContent(caracteristicasGrid);
+
+        // Añadir los paneles al VBox
+        vbox.getChildren().addAll(identificacionPane, caracteristicasPane);
+
+        // Añadir un separador
+        Separator separator = new Separator();
+        vbox.getChildren().add(separator);
+
+        // Añadir un label informativo
+        Label infoLabel = new Label("Deja los campos vacíos para ignorarlos en la búsqueda");
+        infoLabel.setStyle("-fx-font-style: italic; -fx-text-fill: gray;");
+        vbox.getChildren().add(infoLabel);
+
+        dialog.getDialogPane().setContent(vbox);
+
+        // Manejar el botón Limpiar
+        Button limpiarButton = (Button) dialog.getDialogPane().lookupButton(limpiarButtonType);
+        limpiarButton.setOnAction(e -> {
+            matriculaField.clear();
+            marcaField.clear();
+            modeloField.clear();
+            anioField.clear();
+            kilometrosField.clear();
+        });
+
+        // Mostrar diálogo y procesar resultado
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == buscarButtonType) {
+                // Obtener valores de búsqueda
+                String matricula = matriculaField.getText().trim().toLowerCase();
+                String marca = marcaField.getText().trim().toLowerCase();
+                String modelo = modeloField.getText().trim().toLowerCase();
+                String anioStr = anioField.getText().trim();
+                String kilometrosStr = kilometrosField.getText().trim();
+
+                // Filtrar vehículos
+                List<Vehiculo> resultados = vehiculosData.stream()
+                    .filter(v -> matricula.isEmpty() || v.getMatricula().toLowerCase().contains(matricula))
+                    .filter(v -> marca.isEmpty() || v.getMarca().toLowerCase().contains(marca))
+                    .filter(v -> modelo.isEmpty() || v.getModelo().toLowerCase().contains(modelo))
+                    .filter(v -> {
+                        if (anioStr.isEmpty()) return true;
+                        try {
+                            int anio = Integer.parseInt(anioStr);
+                            return v.getAnio() == anio;
+                        } catch (NumberFormatException e) {
+                            return false;
+                        }
+                    })
+                    .filter(v -> {
+                        if (kilometrosStr.isEmpty()) return true;
+                        try {
+                            int kilometros = Integer.parseInt(kilometrosStr);
+                            return v.getKilometros() == kilometros;
+                        } catch (NumberFormatException e) {
+                            return false;
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+                if (resultados.isEmpty()) {
+                    mostrarAlerta("Búsqueda sin resultados", "No se encontraron vehículos que coincidan con los criterios de búsqueda.");
+                } else {
+                    // Actualizar la tabla con los resultados
+                    vehiculosData.clear();
+                    vehiculosData.addAll(resultados);
+                    vehiculosTable.setItems(vehiculosData);
+                    
+                    // Seleccionar el primer resultado
+                    vehiculosTable.getSelectionModel().select(0);
+                    mostrarReparacionesDeVehiculo(resultados.get(0));
+                }
+            }
         });
     }
 
