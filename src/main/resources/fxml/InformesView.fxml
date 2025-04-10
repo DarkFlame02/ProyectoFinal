@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+
+<VBox spacing="15" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   
+   <padding>
+      <Insets top="20" right="20" bottom="20" left="20" />
+   </padding>
+   
+   <Label text="Informes y Estadísticas" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+   
+   <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+      <Tab text="Estadísticas de Reparaciones">
+         <VBox spacing="15">
+            <padding>
+               <Insets top="15" right="15" bottom="15" left="15" />
+            </padding>
+            
+            <Label text="Costos de reparación por vehículo" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+            
+            <BarChart title="Costos totales de reparación por vehículo">
+               <xAxis>
+                  <CategoryAxis label="Vehículo" />
+               </xAxis>
+               <yAxis>
+                  <NumberAxis label="Costo Total" />
+               </yAxis>
+            </BarChart>
+         </VBox>
+      </Tab>
+      
+      <Tab text="Valoraciones de Talleres">
+         <VBox spacing="15">
+            <padding>
+               <Insets top="15" right="15" bottom="15" left="15" />
+            </padding>
+            
+            <Label text="Valoraciones promedio de talleres" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+            
+            <PieChart title="Distribución de reparaciones por taller" />
+         </VBox>
+      </Tab>
+      
+      <Tab text="Historial Anual">
+         <VBox spacing="15">
+            <padding>
+               <Insets top="15" right="15" bottom="15" left="15" />
+            </padding>
+            
+            <Label text="Historial anual de reparaciones" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+            
+            <LineChart title="Costos de reparación a lo largo del tiempo">
+               <xAxis>
+                  <CategoryAxis label="Mes" />
+               </xAxis>
+               <yAxis>
+                  <NumberAxis label="Costo" />
+               </yAxis>
+            </LineChart>
+         </VBox>
+      </Tab>
+   </TabPane>
+</VBox> 

@@ -1,12 +1,9 @@
 package dam.dad.app.controller;
 
-import java.io.IOException;
+import dam.dad.app.MainApp;
 import dam.dad.app.db.DatabaseManager;
 import dam.dad.app.util.ValidationUtils;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -50,15 +47,11 @@ public class LoginController {
 
         if (dbManager.validateUser(username, password)) {
             try {
-                // Cargar la vista principal
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/RootView.fxml"));
-                Parent root = loader.load();
-                
+                // Cargar la vista principal usando el método en MainApp
                 Stage stage = (Stage) usernameField.getScene().getWindow();
-                stage.setScene(new Scene(root));
-                stage.setTitle("Gestión de Reparaciones de Vehículos");
-            } catch (IOException e) {
-                showError("Error al cargar la aplicación");
+                MainApp.loadMainView(stage);
+            } catch (Exception e) {
+                showError("Error al cargar la aplicación: " + e.getMessage());
                 e.printStackTrace();
             }
         } else {

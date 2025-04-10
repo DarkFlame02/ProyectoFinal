@@ -8,7 +8,7 @@ public class Taller {
     private String email;
     private String especialidad;
     private boolean activo;
-    private double valoracionPromedio;
+    private double valoracionMedia;
     
     public Taller() {
     }
@@ -22,7 +22,7 @@ public class Taller {
         this.email = email;
         this.especialidad = especialidad;
         this.activo = activo;
-        this.valoracionPromedio = 0.0;
+        this.valoracionMedia = 0.0;
     }
 
     public int getId() {
@@ -82,11 +82,19 @@ public class Taller {
     }
     
     public double getValoracionPromedio() {
-        return valoracionPromedio;
+        return valoracionMedia;
     }
     
-    public void setValoracionPromedio(double valoracionPromedio) {
-        this.valoracionPromedio = valoracionPromedio;
+    public void setValoracionPromedio(double valoracion) {
+        this.valoracionMedia = valoracion;
+    }
+
+    public double getValoracionMedia() {
+        return valoracionMedia;
+    }
+    
+    public void setValoracionMedia(double valoracionMedia) {
+        this.valoracionMedia = valoracionMedia;
     }
 
     @Override

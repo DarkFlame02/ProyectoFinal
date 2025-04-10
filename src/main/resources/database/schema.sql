@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS talleres (
     telefono VARCHAR(20),
     email VARCHAR(100),
     especialidad VARCHAR(100),
+    valoracion_media DECIMAL(3,2) DEFAULT 0,
     activo BOOLEAN DEFAULT TRUE
 );
 
@@ -71,3 +72,44 @@ INSERT INTO talleres (nombre, direccion, telefono, email, especialidad, activo) 
 ('Servicio Técnico Oficial', 'Calle Industria 45, Bilbao', '944567890', 'sto@serviciotecnico.es', 'Concesionario oficial', TRUE),
 ('Motos y Más', 'Avenida del Mediterráneo 67, Alicante', '965678901', 'contacto@motosymas.es', 'Motocicletas', TRUE),
 ('ReparAuto 24h', 'Calle Doctor Fleming 23, Málaga', '952345678', 'info@reparauto24.es', 'Servicio 24 horas', TRUE);
+
+-- Insertar vehículos de ejemplo para el usuario1
+INSERT INTO vehiculos (usuario_id, marca, modelo, matricula, anio, kilometros) VALUES
+(1, 'Seat', 'Ibiza', '1234ABC', 2018, 45000),
+(1, 'Volkswagen', 'Golf', '5678DEF', 2020, 15000),
+(1, 'Toyota', 'Corolla', '9012GHI', 2019, 30000),
+(1, 'Ford', 'Focus', '3456JKL', 2017, 60000),
+(1, 'Renault', 'Clio', '7890MNO', 2021, 8000);
+
+-- Insertar reparaciones de ejemplo
+INSERT INTO reparaciones (vehiculo_id, taller_id, descripcion, fecha_reparacion, costo, estado) VALUES
+(1, 1, 'Cambio de aceite y filtro', '2023-01-15', 80.50, 'Completada'),
+(1, 3, 'Cambio de neumáticos', '2023-03-20', 450.00, 'Completada'),
+(2, 2, 'Reparación de chapa por golpe', '2023-02-10', 320.75, 'Completada'),
+(3, 4, 'Problema eléctrico en el cuadro de mandos', '2023-04-05', 180.00, 'Completada'),
+(4, 1, 'Revisión general', '2023-05-12', 150.00, 'Completada'),
+(5, 6, 'Problema en el sistema de inyección', '2023-06-18', 290.50, 'Completada'),
+(1, 7, 'Cambio de pastillas de freno', '2023-07-22', 120.00, 'Completada'),
+(2, 5, 'Revisión pre-ITV', '2023-08-30', 60.00, 'Programada'),
+(3, 8, 'Cambio de correa de distribución', '2023-09-15', 520.00, 'Pendiente'),
+(4, 10, 'Reparación de urgencia por avería', '2023-10-01', 350.00, 'En progreso');
+
+-- Insertar valoraciones de ejemplo
+INSERT INTO valoraciones (usuario_id, taller_id, puntuacion, comentario) VALUES
+(1, 1, 5, 'Excelente servicio y atención'),
+(1, 3, 4, 'Buen servicio pero un poco caro'),
+(1, 2, 3, 'El trabajo quedó bien pero tardaron más de lo prometido'),
+(1, 4, 5, 'Solucionaron el problema eléctrico rápidamente'),
+(1, 7, 4, 'Buen trato y profesionalidad');
+
+-- Actualizar las valoraciones medias de los talleres
+UPDATE talleres SET valoracion_media = 5.0 WHERE id = 1;
+UPDATE talleres SET valoracion_media = 3.0 WHERE id = 2;
+UPDATE talleres SET valoracion_media = 4.0 WHERE id = 3;
+UPDATE talleres SET valoracion_media = 5.0 WHERE id = 4;
+UPDATE talleres SET valoracion_media = 0.0 WHERE id = 5;
+UPDATE talleres SET valoracion_media = 0.0 WHERE id = 6;
+UPDATE talleres SET valoracion_media = 4.0 WHERE id = 7;
+UPDATE talleres SET valoracion_media = 0.0 WHERE id = 8;
+UPDATE talleres SET valoracion_media = 0.0 WHERE id = 9;
+UPDATE talleres SET valoracion_media = 0.0 WHERE id = 10;

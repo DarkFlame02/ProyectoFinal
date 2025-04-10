@@ -14,6 +14,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import dam.dad.app.model.Vehiculo;
 import dam.dad.app.model.Reparacion;
 import dam.dad.app.model.Taller;
+import dam.dad.app.model.Valoracion;
 
 public class DatabaseManager {
     private static final String PROPERTIES_FILE = "/database.properties";
@@ -348,8 +349,8 @@ public class DatabaseManager {
                 taller.setEspecialidad(rs.getString("especialidad"));
                 taller.setActivo(rs.getBoolean("activo"));
                 
-                // Calcular valoración promedio
-                taller.setValoracionPromedio(calcularValoracionPromedio(taller.getId()));
+                // Cargar la valoración media desde la base de datos
+                taller.setValoracionMedia(rs.getDouble("valoracion_media"));
                 
                 talleres.add(taller);
             }
@@ -375,5 +376,164 @@ public class DatabaseManager {
         }
         
         return 0.0;
+    }
+
+    public int getLoggedInUserId() {
+        return currentUserId;
+    }
+    
+    public void closeConnection() {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    // MÉTODOS PARA GESTIONAR TALLERES Y VALORACIONES
+    
+    public List<Valoracion> getValoracionesByTaller(int tallerId) {
+        List<Valoracion> valoraciones = new ArrayList<>();
+        String sql = "SELECT * FROM valoraciones WHERE taller_id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, tallerId);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Valoracion valoracion = new Valoracion();
+                valoracion.setId(rs.getInt("id"));
+                valoracion.setTallerId(rs.getInt("taller_id"));
+                valoracion.setUsuarioId(rs.getInt("usuario_id"));
+                valoracion.setPuntuacion(rs.getInt("puntuacion"));
+                valoracion.setComentario(rs.getString("comentario"));
+                
+                valoraciones.add(valoracion);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return valoraciones;
+    }
+    
+    public boolean addTaller(Taller taller) {
+        String sql = "INSERT INTO talleres (nombre, direccion, telefono) VALUES (?, ?, ?)";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, taller.getNombre());
+            stmt.setString(2, taller.getDireccion());
+            stmt.setString(3, taller.getTelefono());
+            
+            int affectedRows = stmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    taller.setId(generatedKeys.getInt(1));
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    public boolean updateTaller(Taller taller) {
+        String sql = "UPDATE talleres SET nombre = ?, direccion = ?, telefono = ? WHERE id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, taller.getNombre());
+            stmt.setString(2, taller.getDireccion());
+            stmt.setString(3, taller.getTelefono());
+            stmt.setInt(4, taller.getId());
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public boolean deleteTaller(int tallerId) {
+        // Verificar si hay reparaciones asociadas a este taller
+        String checkSql = "SELECT COUNT(*) FROM reparaciones WHERE taller_id = ?";
+        try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+            checkStmt.setInt(1, tallerId);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                // Hay reparaciones asociadas, no se puede eliminar
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        
+        // Eliminar primero las valoraciones asociadas
+        String deleteValoracionesSql = "DELETE FROM valoraciones WHERE taller_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(deleteValoracionesSql)) {
+            stmt.setInt(1, tallerId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        
+        // Luego eliminar el taller
+        String deleteTallerSql = "DELETE FROM talleres WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(deleteTallerSql)) {
+            stmt.setInt(1, tallerId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public boolean addValoracion(Valoracion valoracion) {
+        String sql = "INSERT INTO valoraciones (taller_id, usuario_id, puntuacion, comentario) VALUES (?, ?, ?, ?)";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, valoracion.getTallerId());
+            stmt.setInt(2, currentUserId);
+            stmt.setInt(3, valoracion.getPuntuacion());
+            stmt.setString(4, valoracion.getComentario());
+            
+            int affectedRows = stmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    valoracion.setId(generatedKeys.getInt(1));
+                    
+                    // Actualizar la valoración media del taller
+                    actualizarValoracionMedia(valoracion.getTallerId());
+                    
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    private void actualizarValoracionMedia(int tallerId) {
+        String sql = "UPDATE talleres SET valoracion_media = ? WHERE id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            double valoracionMedia = calcularValoracionPromedio(tallerId);
+            stmt.setDouble(1, valoracionMedia);
+            stmt.setInt(2, tallerId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 } 
