@@ -3,6 +3,7 @@ package dam.dad.app.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -779,7 +781,178 @@ public class RootController {
             return;
         }
         
-        mostrarReparacionesDeVehiculo(selectedVehiculo);
+        // Crear diálogo para mostrar el historial
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Historial de Reparaciones");
+        dialog.setHeaderText("Historial de reparaciones para: " + selectedVehiculo.toString());
+        
+        // Botones
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        
+        // Contenido principal
+        VBox vbox = new VBox(5);
+        vbox.setPadding(new javafx.geometry.Insets(10, 10, 10, 10));
+        
+        // Panel de filtros y estadísticas en una fila
+        HBox topBox = new HBox(10);
+        topBox.setPadding(new javafx.geometry.Insets(0, 0, 10, 0));
+        
+        // Panel de filtros
+        VBox filtrosBox = new VBox(5);
+        filtrosBox.setPadding(new javafx.geometry.Insets(5));
+        filtrosBox.setStyle("-fx-border-color: lightgray; -fx-border-radius: 5; -fx-padding: 5;");
+        
+        Label filtrosLabel = new Label("Filtros y Ordenación");
+        filtrosLabel.setStyle("-fx-font-weight: bold;");
+        
+        GridPane filtrosGrid = new GridPane();
+        filtrosGrid.setHgap(5);
+        filtrosGrid.setVgap(5);
+        
+        ComboBox<String> estadoFilter = new ComboBox<>(
+            FXCollections.observableArrayList("Todos", "Pendiente", "En progreso", "Completada", "Cancelada")
+        );
+        estadoFilter.setValue("Todos");
+        
+        ComboBox<String> ordenCombo = new ComboBox<>(
+            FXCollections.observableArrayList("Fecha", "Costo", "Estado")
+        );
+        ordenCombo.setValue("Fecha");
+        
+        ComboBox<String> direccionCombo = new ComboBox<>(
+            FXCollections.observableArrayList("Ascendente", "Descendente")
+        );
+        direccionCombo.setValue("Descendente");
+        
+        filtrosGrid.add(new Label("Estado:"), 0, 0);
+        filtrosGrid.add(estadoFilter, 1, 0);
+        filtrosGrid.add(new Label("Ordenar:"), 0, 1);
+        filtrosGrid.add(ordenCombo, 1, 1);
+        filtrosGrid.add(new Label("Dirección:"), 0, 2);
+        filtrosGrid.add(direccionCombo, 1, 2);
+        
+        filtrosBox.getChildren().addAll(filtrosLabel, filtrosGrid);
+        
+        // Panel de estadísticas
+        VBox statsBox = new VBox(5);
+        statsBox.setPadding(new javafx.geometry.Insets(5));
+        statsBox.setStyle("-fx-border-color: lightgray; -fx-border-radius: 5; -fx-padding: 5;");
+        
+        Label statsLabel = new Label("Estadísticas");
+        statsLabel.setStyle("-fx-font-weight: bold;");
+        
+        Label totalReparaciones = new Label();
+        Label costoTotal = new Label();
+        Label promedioCosto = new Label();
+        Label estadoMasComun = new Label();
+        
+        statsBox.getChildren().addAll(
+            statsLabel,
+            totalReparaciones,
+            costoTotal,
+            promedioCosto,
+            estadoMasComun
+        );
+        
+        topBox.getChildren().addAll(filtrosBox, statsBox);
+        
+        // Tabla de reparaciones
+        TableView<Reparacion> historialTable = new TableView<>();
+        historialTable.setPrefHeight(200);
+        
+        TableColumn<Reparacion, LocalDate> fechaCol = new TableColumn<>("Fecha");
+        fechaCol.setCellValueFactory(new PropertyValueFactory<>("fechaReparacion"));
+        fechaCol.setPrefWidth(100);
+        
+        TableColumn<Reparacion, String> descripcionCol = new TableColumn<>("Descripción");
+        descripcionCol.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
+        descripcionCol.setPrefWidth(200);
+        
+        TableColumn<Reparacion, Double> costoCol = new TableColumn<>("Costo");
+        costoCol.setCellValueFactory(new PropertyValueFactory<>("costo"));
+        costoCol.setPrefWidth(80);
+        
+        TableColumn<Reparacion, String> estadoCol = new TableColumn<>("Estado");
+        estadoCol.setCellValueFactory(new PropertyValueFactory<>("estado"));
+        estadoCol.setPrefWidth(100);
+        
+        historialTable.getColumns().addAll(fechaCol, descripcionCol, costoCol, estadoCol);
+        
+        // Función para actualizar la tabla y estadísticas
+        Runnable updateTable = () -> {
+            List<Reparacion> reparaciones = selectedVehiculo.getReparaciones();
+            
+            // Aplicar filtro de estado
+            if (!estadoFilter.getValue().equals("Todos")) {
+                reparaciones = reparaciones.stream()
+                    .filter(r -> r.getEstado().equals(estadoFilter.getValue()))
+                    .collect(Collectors.toList());
+            }
+            
+            // Aplicar ordenación
+            String criterioOrden = ordenCombo.getValue();
+            boolean ascendente = direccionCombo.getValue().equals("Ascendente");
+            
+            reparaciones.sort((r1, r2) -> {
+                int resultado = 0;
+                switch (criterioOrden) {
+                    case "Fecha":
+                        resultado = r1.getFechaReparacion().compareTo(r2.getFechaReparacion());
+                        break;
+                    case "Costo":
+                        resultado = Double.compare(r1.getCosto(), r2.getCosto());
+                        break;
+                    case "Estado":
+                        resultado = r1.getEstado().compareTo(r2.getEstado());
+                        break;
+                }
+                return ascendente ? resultado : -resultado;
+            });
+            
+            // Actualizar tabla
+            historialTable.setItems(FXCollections.observableArrayList(reparaciones));
+            
+            // Actualizar estadísticas
+            totalReparaciones.setText("Total: " + reparaciones.size() + " reparaciones");
+            
+            double totalCosto = reparaciones.stream()
+                .mapToDouble(Reparacion::getCosto)
+                .sum();
+            costoTotal.setText("Total: " + String.format("%.2f €", totalCosto));
+            
+            double promedio = reparaciones.isEmpty() ? 0 : totalCosto / reparaciones.size();
+            promedioCosto.setText("Promedio: " + String.format("%.2f €", promedio));
+            
+            // Calcular estado más común
+            String estadoMasFrecuente = reparaciones.stream()
+                .collect(Collectors.groupingBy(Reparacion::getEstado, Collectors.counting()))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("No hay reparaciones");
+            estadoMasComun.setText("Estado más común: " + estadoMasFrecuente);
+        };
+        
+        // Añadir listeners a los filtros
+        estadoFilter.valueProperty().addListener((obs, oldVal, newVal) -> updateTable.run());
+        ordenCombo.valueProperty().addListener((obs, oldVal, newVal) -> updateTable.run());
+        direccionCombo.valueProperty().addListener((obs, oldVal, newVal) -> updateTable.run());
+        
+        // Añadir todo al VBox principal
+        vbox.getChildren().addAll(topBox, historialTable);
+        
+        // Añadir un label informativo
+        Label infoLabel = new Label("Los filtros y la ordenación se aplican en tiempo real");
+        infoLabel.setStyle("-fx-font-style: italic; -fx-text-fill: gray;");
+        vbox.getChildren().add(infoLabel);
+        
+        dialog.getDialogPane().setContent(vbox);
+        
+        // Actualizar tabla inicialmente
+        updateTable.run();
+        
+        // Mostrar diálogo
+        dialog.showAndWait();
     }
 
     @FXML
