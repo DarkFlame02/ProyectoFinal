@@ -25,14 +25,11 @@
                   </HBox>
                </top>
                <center>
-                  <BarChart fx:id="costosBarChart" title="Costos totales de reparación por vehículo" legendVisible="true">
-                     <xAxis>
-                        <CategoryAxis label="Vehículo" />
-                     </xAxis>
-                     <yAxis>
-                        <NumberAxis label="Costo Total" />
-                     </yAxis>
-                  </BarChart>
+                  <VBox fx:id="costosContainer" spacing="5">
+                     <padding>
+                        <Insets top="10" right="15" bottom="10" left="15" />
+                     </padding>
+                  </VBox>
                </center>
             </BorderPane>
          </Tab>

@@ -12,7 +12,9 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 
 <BorderPane fx:id="root" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dam.dad.app.controller.RootController">
    <top>
@@ -28,6 +30,7 @@
                <MenuItem onAction="#handleMostrarVehiculos" text="Vehículos y Reparaciones" />
                <MenuItem onAction="#handleMostrarTalleres" text="Talleres" />
                <MenuItem onAction="#handleMostrarInformes" text="Informes" />
+               <MenuItem onAction="#handleMostrarNotificaciones" text="Notificaciones de Mantenimiento" />
             </Menu>
          </MenuBar>
          
@@ -47,13 +50,27 @@
                   <Tooltip text="Ver informes y estadísticas" />
                </tooltip>
             </Button>
+            
+            <!-- Botón de notificaciones simplificado -->
+            <Button fx:id="notificacionesButton" onAction="#handleMostrarNotificaciones" 
+                    style="-fx-font-size: 12px;">
+               <tooltip>
+                  <Tooltip text="Ver notificaciones de mantenimiento" />
+               </tooltip>
+               <graphic>
+                  <HBox spacing="2" alignment="CENTER">
+                     <Label text="🔔" style="-fx-font-size: 12px;"/>
+                     <Label fx:id="notificacionesContador" text="" style="-fx-text-fill: red; -fx-font-weight: bold;"/>
+                  </HBox>
+               </graphic>
+            </Button>
+            
             <Separator orientation="VERTICAL" />
             <Button onAction="#handleActualizarDatos" text="Actualizar">
                <tooltip>
                   <Tooltip text="Actualizar datos" />
                </tooltip>
             </Button>
-            <Separator orientation="VERTICAL" />
             <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
                <Label fx:id="tituloSeccionLabel" style="-fx-font-size: 14; -fx-font-weight: bold;" text="Vehículos y Reparaciones" />
                <padding>

@@ -32,7 +32,29 @@ CREATE TABLE IF NOT EXISTS vehiculos (
     matricula VARCHAR(10) NOT NULL UNIQUE,
     anio INT NOT NULL,
     kilometros INT DEFAULT 0,
+    km_mensuales INT DEFAULT 0,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);
+
+-- Tabla de mantenimientos por defecto
+CREATE TABLE IF NOT EXISTS mantenimientos_default (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tipo VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    intervalo_km INT NOT NULL,
+    criticidad VARCHAR(20) DEFAULT 'Media' -- Alta, Media, Baja
+);
+
+-- Tabla de notificaciones de mantenimiento
+CREATE TABLE IF NOT EXISTS notificaciones_mantenimiento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    vehiculo_id INT NOT NULL,
+    mantenimiento_id INT NOT NULL,
+    km_estimados_restantes INT NOT NULL,
+    fecha_estimada DATE,
+    estado VARCHAR(20) DEFAULT 'Pendiente', -- Pendiente, Notificado, Completado
+    FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id),
+    FOREIGN KEY (mantenimiento_id) REFERENCES mantenimientos_default(id)
 );
 
 -- Tabla de reparaciones
@@ -73,13 +95,26 @@ INSERT INTO talleres (nombre, direccion, telefono, email, especialidad, activo) 
 ('Motos y Más', 'Avenida del Mediterráneo 67, Alicante', '965678901', 'contacto@motosymas.es', 'Motocicletas', TRUE),
 ('ReparAuto 24h', 'Calle Doctor Fleming 23, Málaga', '952345678', 'info@reparauto24.es', 'Servicio 24 horas', TRUE);
 
+-- Insertar datos de mantenimientos por defecto
+INSERT INTO mantenimientos_default (tipo, descripcion, intervalo_km, criticidad) VALUES
+('Cambio de aceite y filtro', 'Cambio de aceite y filtro del motor', 10000, 'Alta'),
+('Cambio de filtro de aire', 'Sustitución del filtro de aire del motor', 15000, 'Media'),
+('Cambio de pastillas de freno', 'Sustitución de las pastillas de freno', 30000, 'Alta'),
+('Cambio de discos de freno', 'Sustitución de los discos de freno', 60000, 'Alta'),
+('Cambio de líquido de frenos', 'Sustitución del líquido de frenos', 30000, 'Alta'),
+('Cambio de correa de distribución', 'Sustitución de la correa de distribución', 80000, 'Alta'),
+('Cambio de neumáticos', 'Sustitución de neumáticos', 40000, 'Alta'),
+('Cambio de batería', 'Sustitución de la batería', 60000, 'Media'),
+('Cambio de bujías', 'Sustitución de las bujías', 40000, 'Media'),
+('Cambio de líquido refrigerante', 'Sustitución del líquido refrigerante', 60000, 'Media');
+
 -- Insertar vehículos de ejemplo para el usuario1
-INSERT INTO vehiculos (usuario_id, marca, modelo, matricula, anio, kilometros) VALUES
-(1, 'Seat', 'Ibiza', '1234ABC', 2018, 45000),
-(1, 'Volkswagen', 'Golf', '5678DEF', 2020, 15000),
-(1, 'Toyota', 'Corolla', '9012GHI', 2019, 30000),
-(1, 'Ford', 'Focus', '3456JKL', 2017, 60000),
-(1, 'Renault', 'Clio', '7890MNO', 2021, 8000);
+INSERT INTO vehiculos (usuario_id, marca, modelo, matricula, anio, kilometros, km_mensuales) VALUES
+(1, 'Seat', 'Ibiza', '1234ABC', 2018, 45000, 800),
+(1, 'Volkswagen', 'Golf', '5678DEF', 2020, 15000, 600),
+(1, 'Toyota', 'Corolla', '9012GHI', 2019, 30000, 750),
+(1, 'Ford', 'Focus', '3456JKL', 2017, 60000, 900),
+(1, 'Renault', 'Clio', '7890MNO', 2021, 8000, 500);
 
 -- Insertar reparaciones de ejemplo
 INSERT INTO reparaciones (vehiculo_id, taller_id, descripcion, fecha_reparacion, costo, estado) VALUES

@@ -43,7 +43,6 @@
             <Button text="Editar" onAction="#handleEditarVehiculo" prefWidth="80" prefHeight="25" />
             <Button text="Eliminar" onAction="#handleEliminarVehiculo" prefWidth="80" prefHeight="25" />
             <Button text="Buscar" onAction="#handleBuscarVehiculo" prefWidth="80" prefHeight="25" />
-            <Button text="Historial" onAction="#handleHistorialReparaciones" prefWidth="80" prefHeight="25" />
          </HBox>
       </VBox>
       

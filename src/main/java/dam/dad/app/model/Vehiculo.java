@@ -11,13 +11,14 @@ public class Vehiculo {
     private String matricula;
     private int anio;
     private int kilometros;
+    private int kmMensuales;
     private List<Reparacion> reparaciones;
     
     public Vehiculo() {
         this.reparaciones = new ArrayList<>();
     }
     
-    public Vehiculo(int id, int usuarioId, String marca, String modelo, String matricula, int anio, int kilometros) {
+    public Vehiculo(int id, int usuarioId, String marca, String modelo, String matricula, int anio, int kilometros, int kmMensuales) {
         this.id = id;
         this.usuarioId = usuarioId;
         this.marca = marca;
@@ -25,6 +26,7 @@ public class Vehiculo {
         this.matricula = matricula;
         this.anio = anio;
         this.kilometros = kilometros;
+        this.kmMensuales = kmMensuales;
         this.reparaciones = new ArrayList<>();
     }
 
@@ -82,6 +84,14 @@ public class Vehiculo {
 
     public void setKilometros(int kilometros) {
         this.kilometros = kilometros;
+    }
+    
+    public int getKmMensuales() {
+        return kmMensuales;
+    }
+    
+    public void setKmMensuales(int kmMensuales) {
+        this.kmMensuales = kmMensuales;
     }
 
     public List<Reparacion> getReparaciones() {

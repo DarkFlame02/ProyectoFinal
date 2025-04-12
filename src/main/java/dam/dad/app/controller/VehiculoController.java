@@ -153,6 +153,8 @@ public class VehiculoController {
         anioField.setPromptText("Año");
         TextField kilometrosField = new TextField();
         kilometrosField.setPromptText("Kilómetros");
+        TextField kmMensualesField = new TextField();
+        kmMensualesField.setPromptText("Kilómetros mensuales estimados");
         
         grid.add(new Label("Marca:"), 0, 0);
         grid.add(marcaField, 1, 0);
@@ -164,23 +166,38 @@ public class VehiculoController {
         grid.add(anioField, 1, 3);
         grid.add(new Label("Kilómetros:"), 0, 4);
         grid.add(kilometrosField, 1, 4);
+        grid.add(new Label("Km mensuales:"), 0, 5);
+        grid.add(kmMensualesField, 1, 5);
         
         dialog.getDialogPane().setContent(grid);
         
-        // Convertir el resultado
+        // Convertir el resultado al hacer clic en Guardar
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == guardarButtonType) {
                 try {
-                    Vehiculo vehiculo = new Vehiculo();
-                    vehiculo.setMarca(marcaField.getText().trim());
-                    vehiculo.setModelo(modeloField.getText().trim());
-                    vehiculo.setMatricula(matriculaField.getText().trim());
-                    vehiculo.setAnio(Integer.parseInt(anioField.getText().trim()));
-                    vehiculo.setKilometros(Integer.parseInt(kilometrosField.getText().trim()));
+                    String marca = marcaField.getText().trim();
+                    String modelo = modeloField.getText().trim();
+                    String matricula = matriculaField.getText().trim();
+                    int anio = Integer.parseInt(anioField.getText().trim());
+                    int kilometros = Integer.parseInt(kilometrosField.getText().trim());
+                    int kmMensuales = Integer.parseInt(kmMensualesField.getText().trim());
                     
-                    return vehiculo;
+                    if (marca.isEmpty() || modelo.isEmpty() || matricula.isEmpty()) {
+                        showAlert("Campos obligatorios", "Todos los campos son obligatorios.");
+                        return null;
+                    }
+                    
+                    Vehiculo nuevoVehiculo = new Vehiculo();
+                    nuevoVehiculo.setMarca(marca);
+                    nuevoVehiculo.setModelo(modelo);
+                    nuevoVehiculo.setMatricula(matricula);
+                    nuevoVehiculo.setAnio(anio);
+                    nuevoVehiculo.setKilometros(kilometros);
+                    nuevoVehiculo.setKmMensuales(kmMensuales);
+                    
+                    return nuevoVehiculo;
                 } catch (NumberFormatException e) {
-                    mostrarAlerta("Error en los datos", "Por favor, introduce valores numéricos válidos para Año y Kilómetros.");
+                    showAlert("Error de formato", "El año, los kilómetros y los kilómetros mensuales deben ser números enteros.");
                     return null;
                 }
             }
@@ -192,17 +209,21 @@ public class VehiculoController {
         result.ifPresent(vehiculo -> {
             if (dbManager.addVehiculo(vehiculo)) {
                 cargarVehiculos();
+                
+                // Mostrar mensaje de confirmación
+                showAlert("Vehículo añadido", "El vehículo ha sido añadido correctamente.");
             } else {
-                mostrarAlerta("Error al guardar", "No se pudo guardar el vehículo. La matrícula podría estar duplicada.");
+                showAlert("Error", "No se pudo añadir el vehículo. Es posible que la matrícula ya exista.");
             }
         });
     }
 
     @FXML
     public void handleEditarVehiculo() {
-        Vehiculo selectedVehiculo = vehiculosTable.getSelectionModel().getSelectedItem();
-        if (selectedVehiculo == null) {
-            mostrarAlerta("No hay vehículo seleccionado", "Por favor, selecciona un vehículo para editar.");
+        Vehiculo vehiculoSeleccionado = vehiculosTable.getSelectionModel().getSelectedItem();
+        
+        if (vehiculoSeleccionado == null) {
+            showAlert("Sin selección", "Por favor, selecciona un vehículo para editar.");
             return;
         }
         
@@ -221,11 +242,12 @@ public class VehiculoController {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
         
-        TextField marcaField = new TextField(selectedVehiculo.getMarca());
-        TextField modeloField = new TextField(selectedVehiculo.getModelo());
-        TextField matriculaField = new TextField(selectedVehiculo.getMatricula());
-        TextField anioField = new TextField(String.valueOf(selectedVehiculo.getAnio()));
-        TextField kilometrosField = new TextField(String.valueOf(selectedVehiculo.getKilometros()));
+        TextField marcaField = new TextField(vehiculoSeleccionado.getMarca());
+        TextField modeloField = new TextField(vehiculoSeleccionado.getModelo());
+        TextField matriculaField = new TextField(vehiculoSeleccionado.getMatricula());
+        TextField anioField = new TextField(String.valueOf(vehiculoSeleccionado.getAnio()));
+        TextField kilometrosField = new TextField(String.valueOf(vehiculoSeleccionado.getKilometros()));
+        TextField kmMensualesField = new TextField(String.valueOf(vehiculoSeleccionado.getKmMensuales()));
         
         grid.add(new Label("Marca:"), 0, 0);
         grid.add(marcaField, 1, 0);
@@ -237,25 +259,41 @@ public class VehiculoController {
         grid.add(anioField, 1, 3);
         grid.add(new Label("Kilómetros:"), 0, 4);
         grid.add(kilometrosField, 1, 4);
+        grid.add(new Label("Km mensuales:"), 0, 5);
+        grid.add(kmMensualesField, 1, 5);
         
         dialog.getDialogPane().setContent(grid);
         
-        // Convertir el resultado
+        // Convertir el resultado al hacer clic en Guardar
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == guardarButtonType) {
                 try {
-                    Vehiculo vehiculo = new Vehiculo();
-                    vehiculo.setId(selectedVehiculo.getId());
-                    vehiculo.setUsuarioId(selectedVehiculo.getUsuarioId());
-                    vehiculo.setMarca(marcaField.getText().trim());
-                    vehiculo.setModelo(modeloField.getText().trim());
-                    vehiculo.setMatricula(matriculaField.getText().trim());
-                    vehiculo.setAnio(Integer.parseInt(anioField.getText().trim()));
-                    vehiculo.setKilometros(Integer.parseInt(kilometrosField.getText().trim()));
+                    String marca = marcaField.getText().trim();
+                    String modelo = modeloField.getText().trim();
+                    String matricula = matriculaField.getText().trim();
+                    int anio = Integer.parseInt(anioField.getText().trim());
+                    int kilometros = Integer.parseInt(kilometrosField.getText().trim());
+                    int kmMensuales = Integer.parseInt(kmMensualesField.getText().trim());
                     
-                    return vehiculo;
+                    if (marca.isEmpty() || modelo.isEmpty() || matricula.isEmpty()) {
+                        showAlert("Campos obligatorios", "Todos los campos son obligatorios.");
+                        return null;
+                    }
+                    
+                    // Crear copia del vehículo con los datos actualizados
+                    Vehiculo vehiculoActualizado = new Vehiculo();
+                    vehiculoActualizado.setId(vehiculoSeleccionado.getId());
+                    vehiculoActualizado.setUsuarioId(vehiculoSeleccionado.getUsuarioId());
+                    vehiculoActualizado.setMarca(marca);
+                    vehiculoActualizado.setModelo(modelo);
+                    vehiculoActualizado.setMatricula(matricula);
+                    vehiculoActualizado.setAnio(anio);
+                    vehiculoActualizado.setKilometros(kilometros);
+                    vehiculoActualizado.setKmMensuales(kmMensuales);
+                    
+                    return vehiculoActualizado;
                 } catch (NumberFormatException e) {
-                    mostrarAlerta("Error en los datos", "Por favor, introduce valores numéricos válidos para Año y Kilómetros.");
+                    showAlert("Error de formato", "El año, los kilómetros y los kilómetros mensuales deben ser números enteros.");
                     return null;
                 }
             }
@@ -264,11 +302,26 @@ public class VehiculoController {
         
         Optional<Vehiculo> result = dialog.showAndWait();
         
-        result.ifPresent(vehiculo -> {
-            if (dbManager.updateVehiculo(vehiculo)) {
+        result.ifPresent(vehiculoActualizado -> {
+            if (dbManager.updateVehiculo(vehiculoActualizado)) {
                 cargarVehiculos();
+                
+                // Mostrar mensaje de confirmación
+                Alert confirmacion = new Alert(Alert.AlertType.INFORMATION);
+                confirmacion.setTitle("Vehículo actualizado");
+                confirmacion.setHeaderText("El vehículo ha sido actualizado correctamente");
+                
+                // Si hubo cambios en los km o km mensuales, informar sobre mantenimientos
+                if (vehiculoSeleccionado.getKilometros() != vehiculoActualizado.getKilometros() || 
+                    vehiculoSeleccionado.getKmMensuales() != vehiculoActualizado.getKmMensuales()) {
+                    confirmacion.setContentText("Se han actualizado las notificaciones de mantenimiento según los nuevos valores de kilometraje.");
+                } else {
+                    confirmacion.setContentText("Los datos del vehículo se han guardado correctamente.");
+                }
+                
+                confirmacion.showAndWait();
             } else {
-                mostrarAlerta("Error al actualizar", "No se pudo actualizar el vehículo. La matrícula podría estar duplicada.");
+                showAlert("Error", "No se pudo actualizar el vehículo. Es posible que la matrícula ya exista.");
             }
         });
     }
@@ -353,55 +406,15 @@ public class VehiculoController {
         });
     }
 
-    @FXML
-    public void handleHistorialReparaciones() {
-        Vehiculo selectedVehiculo = getSelectedVehiculo();
-        if (selectedVehiculo == null) {
-            mostrarAlerta("No hay vehículo seleccionado", "Por favor, selecciona un vehículo para ver su historial de reparaciones.");
-            return;
-        }
-        
-        // Crear diálogo para mostrar el historial
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Historial de Reparaciones");
-        dialog.setHeaderText("Historial de reparaciones para: " + selectedVehiculo.getMarca() + " " + selectedVehiculo.getModelo() + " (" + selectedVehiculo.getMatricula() + ")");
-        
-        // Botones
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-        
-        // Contenido principal - simplificado para pruebas
-        VBox vbox = new VBox(10);
-        vbox.setPadding(new Insets(20));
-        
-        TableView<Reparacion> historialTable = new TableView<>();
-        
-        // Columnas simplificadas
-        TableColumn<Reparacion, LocalDate> fechaCol = new TableColumn<>("Fecha");
-        fechaCol.setCellValueFactory(new PropertyValueFactory<>("fechaReparacion"));
-        
-        TableColumn<Reparacion, String> descripcionCol = new TableColumn<>("Descripción");
-        descripcionCol.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
-        
-        TableColumn<Reparacion, Double> costoCol = new TableColumn<>("Costo");
-        costoCol.setCellValueFactory(new PropertyValueFactory<>("costo"));
-        
-        TableColumn<Reparacion, String> estadoCol = new TableColumn<>("Estado");
-        estadoCol.setCellValueFactory(new PropertyValueFactory<>("estado"));
-        
-        historialTable.getColumns().addAll(fechaCol, descripcionCol, costoCol, estadoCol);
-        
-        // Cargar datos
-        if (selectedVehiculo.getReparaciones() != null) {
-            historialTable.setItems(FXCollections.observableArrayList(selectedVehiculo.getReparaciones()));
-        }
-        
-        vbox.getChildren().add(historialTable);
-        
-        dialog.getDialogPane().setContent(vbox);
-        dialog.showAndWait();
+    private void mostrarAlerta(String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
-    private void mostrarAlerta(String header, String content) {
+    private void showAlert(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText(header);

@@ -17,6 +17,8 @@ import dam.dad.app.model.Vehiculo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
@@ -25,11 +27,20 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 public class InformesController {
     
     @FXML
-    private BarChart<String, Number> costosBarChart;
+    private VBox costosContainer; // Cambiado de BarChart a VBox para contener el nuevo gráfico personalizado
     
     @FXML
     private PieChart valoracionesPieChart;
@@ -54,18 +65,21 @@ public class InformesController {
     }
     
     /**
-     * Carga el gráfico de barras con los costos de reparación por vehículo
+     * Carga el gráfico de costos por vehículo utilizando una visualización personalizada
+     * que es más clara y efectiva que el gráfico de barras estándar
      */
     private void cargarGraficoCostos() {
         try {
+            // Limpiar el contenedor
+            costosContainer.getChildren().clear();
+            
             // Obtener todos los vehículos del usuario actual
             List<Vehiculo> vehiculos = dbManager.getVehiculosByUsuario();
             
-            // Preparar la serie de datos
-            XYChart.Series<String, Number> series = new XYChart.Series<>();
-            series.setName("Costos de reparaciones");
+            // Crear lista de datos de vehículo con sus costos
+            List<VehiculoCosto> vehiculosCosto = new java.util.ArrayList<>();
+            double maxCosto = 0;
             
-            // Calcular costo total por vehículo
             for (Vehiculo vehiculo : vehiculos) {
                 double costoTotal = 0;
                 if (vehiculo.getReparaciones() != null) {
@@ -74,21 +88,94 @@ public class InformesController {
                     }
                 }
                 
-                // Solo añadir vehículos con reparaciones
                 if (costoTotal > 0) {
-                    String label = vehiculo.getMarca() + " " + vehiculo.getModelo() + " (" + vehiculo.getMatricula() + ")";
-                    series.getData().add(new XYChart.Data<>(label, costoTotal));
+                    String etiqueta = vehiculo.getMarca() + " " + vehiculo.getModelo() + " (" + vehiculo.getMatricula() + ")";
+                    vehiculosCosto.add(new VehiculoCosto(vehiculo, etiqueta, costoTotal));
+                    maxCosto = Math.max(maxCosto, costoTotal);
                 }
             }
             
-            // Limpiar gráfico anterior
-            costosBarChart.getData().clear();
-            // Añadir nueva serie
-            costosBarChart.getData().add(series);
+            // Ordenar los vehículos por costo (de mayor a menor)
+            vehiculosCosto.sort((v1, v2) -> Double.compare(v2.costo, v1.costo));
+            
+            // Si no hay datos, mostrar mensaje
+            if (vehiculosCosto.isEmpty()) {
+                Label noDataLabel = new Label("No hay datos de costos disponibles");
+                noDataLabel.setStyle("-fx-font-style: italic;");
+                noDataLabel.setPadding(new Insets(20));
+                costosContainer.getChildren().add(noDataLabel);
+                return;
+            }
+            
+            // Crear una representación visual personalizada (barras horizontales)
+            GridPane gridPane = new GridPane();
+            gridPane.setHgap(10);
+            gridPane.setVgap(8);
+            gridPane.setPadding(new Insets(10));
+            
+            // Definir colores para las barras (alternando para mejor visualización)
+            String[] colores = {
+                "#4682B4", // SteelBlue
+                "#1E90FF", // DodgerBlue
+                "#6495ED", // CornflowerBlue
+                "#87CEEB", // SkyBlue
+                "#4169E1"  // RoyalBlue
+            };
+            
+            // Añadir cada vehículo como una barra horizontal
+            for (int i = 0; i < vehiculosCosto.size(); i++) {
+                VehiculoCosto vc = vehiculosCosto.get(i);
+                
+                // Etiqueta del vehículo (izquierda)
+                Label vehiculoLabel = new Label(vc.etiqueta);
+                vehiculoLabel.setPrefWidth(200);
+                vehiculoLabel.setWrapText(true);
+                gridPane.add(vehiculoLabel, 0, i);
+                
+                // Barra de costo (centro)
+                double porcentajeAncho = vc.costo / maxCosto;
+                Rectangle barra = new Rectangle(porcentajeAncho * 400, 25);
+                String colorIndex = colores[i % colores.length];
+                barra.setFill(Color.web(colorIndex));
+                barra.setArcWidth(5);
+                barra.setArcHeight(5);
+                HBox barraContainer = new HBox(barra);
+                barraContainer.setPadding(new Insets(0, 5, 0, 0));
+                gridPane.add(barraContainer, 1, i);
+                
+                // Valor numérico (derecha)
+                Label costoLabel = new Label(String.format("%.2f €", vc.costo));
+                costoLabel.setStyle("-fx-font-weight: bold;");
+                gridPane.add(costoLabel, 2, i);
+            }
+            
+            // Configurar el crecimiento de las columnas
+            GridPane.setHgrow(gridPane.getChildren().get(1), Priority.ALWAYS);
+            
+            // Añadir el gráfico personalizado al contenedor
+            costosContainer.getChildren().add(gridPane);
+            
+            // Añadir un poco de espacio al final
+            VBox.setVgrow(gridPane, Priority.ALWAYS);
             
         } catch (Exception e) {
             mostrarAlerta("Error al cargar gráfico de costos", e.getMessage());
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Clase auxiliar para almacenar los datos de costo por vehículo
+     */
+    private class VehiculoCosto {
+        Vehiculo vehiculo;
+        String etiqueta;
+        double costo;
+        
+        VehiculoCosto(Vehiculo vehiculo, String etiqueta, double costo) {
+            this.vehiculo = vehiculo;
+            this.etiqueta = etiqueta;
+            this.costo = costo;
         }
     }
     
