@@ -93,7 +93,7 @@ public class VehiculoController {
             reparacionController.setVehiculoController(this);
         } catch (IOException e) {
             e.printStackTrace();
-            mostrarAlerta("Error de carga", "No se pudo cargar la vista de reparaciones: " + e.getMessage());
+            showErrorAlert("Error de carga", "No se pudo cargar la vista de reparaciones: " + e.getMessage());
         }
         
         // Cargar datos iniciales
@@ -183,7 +183,7 @@ public class VehiculoController {
                     int kmMensuales = Integer.parseInt(kmMensualesField.getText().trim());
                     
                     if (marca.isEmpty() || modelo.isEmpty() || matricula.isEmpty()) {
-                        showAlert("Campos obligatorios", "Todos los campos son obligatorios.");
+                        showErrorAlert("Campos obligatorios", "Todos los campos son obligatorios.");
                         return null;
                     }
                     
@@ -197,7 +197,7 @@ public class VehiculoController {
                     
                     return nuevoVehiculo;
                 } catch (NumberFormatException e) {
-                    showAlert("Error de formato", "El año, los kilómetros y los kilómetros mensuales deben ser números enteros.");
+                    showErrorAlert("Error de formato", "El año, los kilómetros y los kilómetros mensuales deben ser números enteros.");
                     return null;
                 }
             }
@@ -211,9 +211,9 @@ public class VehiculoController {
                 cargarVehiculos();
                 
                 // Mostrar mensaje de confirmación
-                showAlert("Vehículo añadido", "El vehículo ha sido añadido correctamente.");
+                showInfoAlert("Vehículo añadido", "El vehículo ha sido añadido correctamente.");
             } else {
-                showAlert("Error", "No se pudo añadir el vehículo. Es posible que la matrícula ya exista.");
+                showErrorAlert("Error", "No se pudo añadir el vehículo. Es posible que la matrícula ya exista.");
             }
         });
     }
@@ -223,7 +223,7 @@ public class VehiculoController {
         Vehiculo vehiculoSeleccionado = vehiculosTable.getSelectionModel().getSelectedItem();
         
         if (vehiculoSeleccionado == null) {
-            showAlert("Sin selección", "Por favor, selecciona un vehículo para editar.");
+            showErrorAlert("Sin selección", "Por favor, selecciona un vehículo para editar.");
             return;
         }
         
@@ -276,7 +276,7 @@ public class VehiculoController {
                     int kmMensuales = Integer.parseInt(kmMensualesField.getText().trim());
                     
                     if (marca.isEmpty() || modelo.isEmpty() || matricula.isEmpty()) {
-                        showAlert("Campos obligatorios", "Todos los campos son obligatorios.");
+                        showErrorAlert("Campos obligatorios", "Todos los campos son obligatorios.");
                         return null;
                     }
                     
@@ -293,7 +293,7 @@ public class VehiculoController {
                     
                     return vehiculoActualizado;
                 } catch (NumberFormatException e) {
-                    showAlert("Error de formato", "El año, los kilómetros y los kilómetros mensuales deben ser números enteros.");
+                    showErrorAlert("Error de formato", "El año, los kilómetros y los kilómetros mensuales deben ser números enteros.");
                     return null;
                 }
             }
@@ -307,44 +307,47 @@ public class VehiculoController {
                 cargarVehiculos();
                 
                 // Mostrar mensaje de confirmación
-                Alert confirmacion = new Alert(Alert.AlertType.INFORMATION);
-                confirmacion.setTitle("Vehículo actualizado");
-                confirmacion.setHeaderText("El vehículo ha sido actualizado correctamente");
+                showInfoAlert("Vehículo actualizado", "El vehículo ha sido actualizado correctamente.");
                 
-                // Si hubo cambios en los km o km mensuales, informar sobre mantenimientos
-                if (vehiculoSeleccionado.getKilometros() != vehiculoActualizado.getKilometros() || 
-                    vehiculoSeleccionado.getKmMensuales() != vehiculoActualizado.getKmMensuales()) {
+                // Mostrar un mensaje adicional si se actualizaron las notificaciones
+                if (vehiculoActualizado.getKilometros() != vehiculoSeleccionado.getKilometros()) {
+                    Alert confirmacion = new Alert(Alert.AlertType.INFORMATION);
+                    confirmacion.setTitle("Notificaciones actualizadas");
+                    confirmacion.setHeaderText("Notificaciones de mantenimiento actualizadas");
                     confirmacion.setContentText("Se han actualizado las notificaciones de mantenimiento según los nuevos valores de kilometraje.");
-                } else {
-                    confirmacion.setContentText("Los datos del vehículo se han guardado correctamente.");
+                    confirmacion.showAndWait();
                 }
-                
-                confirmacion.showAndWait();
             } else {
-                showAlert("Error", "No se pudo actualizar el vehículo. Es posible que la matrícula ya exista.");
+                showErrorAlert("Error", "No se pudo actualizar el vehículo.");
             }
         });
     }
 
     @FXML
     public void handleEliminarVehiculo() {
-        Vehiculo selectedVehiculo = vehiculosTable.getSelectionModel().getSelectedItem();
-        if (selectedVehiculo == null) {
-            mostrarAlerta("No hay vehículo seleccionado", "Por favor, selecciona un vehículo para eliminar.");
+        Vehiculo vehiculoSeleccionado = vehiculosTable.getSelectionModel().getSelectedItem();
+        
+        if (vehiculoSeleccionado == null) {
+            showErrorAlert("Sin selección", "Por favor, selecciona un vehículo para eliminar.");
             return;
         }
         
+        // Confirmar eliminación
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
         confirmacion.setTitle("Confirmar eliminación");
-        confirmacion.setHeaderText("¿Estás seguro de eliminar este vehículo?");
-        confirmacion.setContentText("Esta acción eliminará también todas las reparaciones asociadas.");
+        confirmacion.setHeaderText("¿Estás seguro que deseas eliminar este vehículo?");
+        confirmacion.setContentText("Se eliminarán todas las reparaciones asociadas a este vehículo.\nEsta acción no se puede deshacer.");
         
         Optional<ButtonType> result = confirmacion.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            if (dbManager.deleteVehiculo(selectedVehiculo.getId())) {
-                cargarVehiculos();
+            if (dbManager.deleteVehiculo(vehiculoSeleccionado.getId())) {
+                // Eliminar vehículo de la lista observable
+                vehiculosData.remove(vehiculoSeleccionado);
+                // Actualizar la tabla
+                vehiculosTable.refresh();
+                showInfoAlert("Vehículo eliminado", "El vehículo ha sido eliminado correctamente junto con todas sus reparaciones.");
             } else {
-                mostrarAlerta("Error al eliminar", "No se pudo eliminar el vehículo.");
+                showErrorAlert("Error", "No se pudo eliminar el vehículo.");
             }
         }
     }
@@ -401,20 +404,26 @@ public class VehiculoController {
             vehiculosData.addAll(vehiculosFiltrados);
             
             if (vehiculosData.isEmpty()) {
-                mostrarAlerta("Sin resultados", "No se encontraron vehículos que coincidan con la búsqueda.");
+                showErrorAlert("Sin resultados", "No se encontraron vehículos que coincidan con la búsqueda.");
             }
         });
     }
 
-    private void mostrarAlerta(String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
+    /**
+     * Muestra una alerta de información al usuario
+     */
+    private void showInfoAlert(String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Información");
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
     }
-
-    private void showAlert(String header, String content) {
+    
+    /**
+     * Muestra una alerta de error al usuario
+     */
+    private void showErrorAlert(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText(header);
