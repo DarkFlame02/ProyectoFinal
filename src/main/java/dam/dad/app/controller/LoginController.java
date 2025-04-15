@@ -31,7 +31,6 @@ public class LoginController {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        // Validar campos
         String usernameError = ValidationUtils.validateUsername(username);
         String passwordError = ValidationUtils.validatePassword(password);
 
@@ -47,7 +46,6 @@ public class LoginController {
 
         if (dbManager.validateUser(username, password)) {
             try {
-                // Cargar la vista principal usando el método en MainApp
                 Stage stage = (Stage) usernameField.getScene().getWindow();
                 MainApp.loadMainView(stage);
             } catch (Exception e) {
@@ -64,7 +62,6 @@ public class LoginController {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        // Validar campos
         String usernameError = ValidationUtils.validateUsername(username);
         String passwordError = ValidationUtils.validatePassword(password);
 
@@ -80,7 +77,6 @@ public class LoginController {
 
         if (dbManager.registerUser(username, password)) {
             showSuccess("Usuario registrado correctamente");
-            // Limpiar campos
             usernameField.clear();
             passwordField.clear();
         } else {

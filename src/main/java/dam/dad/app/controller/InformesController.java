@@ -40,7 +40,7 @@ import javafx.scene.text.FontWeight;
 public class InformesController {
     
     @FXML
-    private VBox costosContainer; // Cambiado de BarChart a VBox para contener el nuevo gráfico personalizado
+    private VBox costosContainer;
     
     @FXML
     private PieChart valoracionesPieChart;
@@ -55,28 +55,20 @@ public class InformesController {
         dbManager = DatabaseManager.getInstance();
     }
     
-    /**
-     * Carga todos los datos para los informes
-     */
+    // Carga todos los datos para los informes
     public void cargarInformes() {
         cargarGraficoCostos();
         cargarGraficoValoraciones();
         cargarGraficoHistorial();
     }
     
-    /**
-     * Carga el gráfico de costos por vehículo utilizando una visualización personalizada
-     * que es más clara y efectiva que el gráfico de barras estándar
-     */
+    // Carga el gráfico de costos por vehículo
     private void cargarGraficoCostos() {
         try {
-            // Limpiar el contenedor
             costosContainer.getChildren().clear();
             
-            // Obtener todos los vehículos del usuario actual
             List<Vehiculo> vehiculos = dbManager.getVehiculosByUsuario();
             
-            // Crear lista de datos de vehículo con sus costos
             List<VehiculoCosto> vehiculosCosto = new java.util.ArrayList<>();
             double maxCosto = 0;
             
@@ -95,10 +87,8 @@ public class InformesController {
                 }
             }
             
-            // Ordenar los vehículos por costo (de mayor a menor)
             vehiculosCosto.sort((v1, v2) -> Double.compare(v2.costo, v1.costo));
             
-            // Si no hay datos, mostrar mensaje
             if (vehiculosCosto.isEmpty()) {
                 Label noDataLabel = new Label("No hay datos de costos disponibles");
                 noDataLabel.setStyle("-fx-font-style: italic;");
@@ -107,32 +97,27 @@ public class InformesController {
                 return;
             }
             
-            // Crear una representación visual personalizada (barras horizontales)
             GridPane gridPane = new GridPane();
             gridPane.setHgap(10);
             gridPane.setVgap(8);
             gridPane.setPadding(new Insets(10));
             
-            // Definir colores para las barras (alternando para mejor visualización)
             String[] colores = {
-                "#4682B4", // SteelBlue
-                "#1E90FF", // DodgerBlue
-                "#6495ED", // CornflowerBlue
-                "#87CEEB", // SkyBlue
-                "#4169E1"  // RoyalBlue
+                "#4682B4",
+                "#1E90FF",
+                "#6495ED",
+                "#87CEEB",
+                "#4169E1"
             };
             
-            // Añadir cada vehículo como una barra horizontal
             for (int i = 0; i < vehiculosCosto.size(); i++) {
                 VehiculoCosto vc = vehiculosCosto.get(i);
                 
-                // Etiqueta del vehículo (izquierda)
                 Label vehiculoLabel = new Label(vc.etiqueta);
                 vehiculoLabel.setPrefWidth(200);
                 vehiculoLabel.setWrapText(true);
                 gridPane.add(vehiculoLabel, 0, i);
                 
-                // Barra de costo (centro)
                 double porcentajeAncho = vc.costo / maxCosto;
                 Rectangle barra = new Rectangle(porcentajeAncho * 400, 25);
                 String colorIndex = colores[i % colores.length];
@@ -143,19 +128,15 @@ public class InformesController {
                 barraContainer.setPadding(new Insets(0, 5, 0, 0));
                 gridPane.add(barraContainer, 1, i);
                 
-                // Valor numérico (derecha)
                 Label costoLabel = new Label(String.format("%.2f €", vc.costo));
                 costoLabel.setStyle("-fx-font-weight: bold;");
                 gridPane.add(costoLabel, 2, i);
             }
             
-            // Configurar el crecimiento de las columnas
             GridPane.setHgrow(gridPane.getChildren().get(1), Priority.ALWAYS);
             
-            // Añadir el gráfico personalizado al contenedor
             costosContainer.getChildren().add(gridPane);
             
-            // Añadir un poco de espacio al final
             VBox.setVgrow(gridPane, Priority.ALWAYS);
             
         } catch (Exception e) {
@@ -163,10 +144,7 @@ public class InformesController {
             e.printStackTrace();
         }
     }
-    
-    /**
-     * Clase auxiliar para almacenar los datos de costo por vehículo
-     */
+
     private class VehiculoCosto {
         Vehiculo vehiculo;
         String etiqueta;
@@ -179,9 +157,7 @@ public class InformesController {
         }
     }
     
-    /**
-     * Carga el gráfico circular con la distribución de valoraciones por taller
-     */
+    // Carga el gráfico circular con la distribución de valoraciones por taller
     private void cargarGraficoValoraciones() {
         try {
             // Obtener talleres con valoraciones
@@ -216,9 +192,7 @@ public class InformesController {
         }
     }
     
-    /**
-     * Carga el gráfico de líneas con el historial de costos por mes
-     */
+    // Carga el gráfico de líneas con el historial de costos por mes
     private void cargarGraficoHistorial() {
         try {
             // Obtener todos los vehículos del usuario actual
@@ -267,6 +241,7 @@ public class InformesController {
         }
     }
     
+    // Muestra una alerta de error
     private void mostrarAlerta(String header, String content) {
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle("Error");

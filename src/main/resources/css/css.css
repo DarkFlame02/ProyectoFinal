@@ -1,16 +1,10 @@
-/* 
- * Estilos principales para la aplicación de Gestión de Reparaciones de Vehículos
- */
-
-/* ----- ESTILOS GENERALES ----- */
 .root {
     -fx-font-family: "Segoe UI", Arial, sans-serif;
     -fx-background-color: #f5f5f5;
 }
 
-/* ----- BOTONES ----- */
 .button {
-    -fx-background-color: #4682B4; /* SteelBlue */
+    -fx-background-color: #4682B4;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-padding: 6px 12px;
@@ -28,7 +22,6 @@
     -fx-background-color: #3a6f9e;
 }
 
-/* Botón de notificaciones */
 #notificacionesButton {
     -fx-padding: 5px 10px;
 }
@@ -38,7 +31,6 @@
     -fx-text-fill: white;
 }
 
-/* ----- LOGIN ----- */
 .title-text {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
@@ -46,7 +38,7 @@
 }
 
 .login-button {
-    -fx-background-color: #4CAF50; /* Verde */
+    -fx-background-color: #4CAF50;
     -fx-text-fill: white;
     -fx-font-size: 12px;
 }
@@ -60,7 +52,7 @@
 }
 
 .register-button {
-    -fx-background-color: #2196F3; /* Azul */
+    -fx-background-color: #2196F3;
     -fx-text-fill: white;
     -fx-font-size: 12px;
 }
@@ -74,7 +66,7 @@
 }
 
 .exit-button {
-    -fx-background-color: #f44336; /* Rojo */
+    -fx-background-color: #f44336;
     -fx-text-fill: white;
     -fx-font-size: 12px;
 }
@@ -99,7 +91,6 @@
     -fx-padding: 5px;
 }
 
-/* ----- BARRA DE MENÚ Y HERRAMIENTAS ----- */
 .menu-bar {
     -fx-background-color: #4682B4;
     -fx-padding: 0;
@@ -119,7 +110,6 @@
     -fx-font-weight: normal;
 }
 
-/* Menú desplegable */
 .menu-bar > .container > .menu > .context-menu {
     -fx-background-color: white;
     -fx-border-color: #c0c0c0;
@@ -128,7 +118,6 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);
 }
 
-/* Elementos del menú */
 .menu-bar .menu-item {
     -fx-background-color: white;
     -fx-padding: 5px 10px;
@@ -148,7 +137,6 @@
     -fx-text-fill: white;
 }
 
-/* Separadores en menús */
 .menu-bar .separator {
     -fx-padding: 2px 0;
 }
@@ -165,7 +153,6 @@
     -fx-padding: 5px;
 }
 
-/* ----- TABLAS ----- */
 .table-view {
     -fx-background-color: white;
     -fx-table-cell-border-color: transparent;
@@ -204,7 +191,6 @@
     -fx-text-fill: black;
 }
 
-/* ----- FORMULARIOS ----- */
 .text-field, .combo-box {
     -fx-background-color: white;
     -fx-border-color: #c0c0c0;
@@ -217,7 +203,6 @@
     -fx-effect: dropshadow(gaussian, rgba(70,130,180,0.3), 3, 0, 0, 0);
 }
 
-/* ----- SECCIONES ----- */
 .titled-pane > .title {
     -fx-background-color: #4682B4;
     -fx-text-fill: white;
@@ -228,7 +213,6 @@
     -fx-background-color: white;
 }
 
-/* ----- GRÁFICOS ----- */
 .chart {
     -fx-padding: 10px;
     -fx-background-color: white;
@@ -250,7 +234,6 @@
     -fx-stroke-width: 2px;
 }
 
-/* Series de gráficos */
 .default-color0.chart-series-line { -fx-stroke: #4682B4; }
 .default-color1.chart-series-line { -fx-stroke: #7cb342; }
 .default-color2.chart-series-line { -fx-stroke: #e57373; }
@@ -265,7 +248,6 @@
 .default-color3.chart-pie { -fx-pie-color: #ffb74d; }
 .default-color4.chart-pie { -fx-pie-color: #9575cd; }
 
-/* ----- DIÁLOGOS ----- */
 .dialog-pane {
     -fx-background-color: #f5f5f5;
 }
@@ -279,7 +261,6 @@
     -fx-font-weight: bold;
 }
 
-/* ----- PESTAÑAS ----- */
 .tab-pane .tab-header-area .tab-header-background {
     -fx-background-color: #e0e0e0;
 }
@@ -303,32 +284,27 @@
     -fx-font-weight: bold;
 }
 
-/* ----- NOTIFICACIONES ----- */
 #notificacionesContador {
     -fx-text-fill: red;
     -fx-font-weight: bold;
 }
 
-/* ----- CONTENEDORES ----- */
 .grid-pane {
     -fx-padding: 10px;
     -fx-hgap: 10px;
     -fx-vgap: 10px;
 }
 
-/* ----- TÍTULOS DE SECCIÓN ----- */
 #tituloSeccionLabel {
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-text-fill: #4682B4;
 }
 
-/* ----- SEPARADORES ----- */
 .separator {
     -fx-background-color: #c0c0c0;
 }
 
-/* ----- TOOLTIP ----- */
 .tooltip {
     -fx-background-color: #4682B4;
     -fx-text-fill: white;

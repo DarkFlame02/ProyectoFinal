@@ -84,7 +84,6 @@ public class TallerController {
         talleresData.addAll(talleres);
         talleresTable.setItems(talleresData);
         
-        // Seleccionar el primer taller si hay alguno
         if (!talleresData.isEmpty()) {
             talleresTable.getSelectionModel().select(0);
             mostrarValoracionesDeTaller(talleresData.get(0));

@@ -33,14 +33,14 @@ public class RootController {
     private Stage primaryStage;
     private DatabaseManager dbManager;
     
-    // Controladores de las vistas
+    // controllers
     private VehiculoController vehiculoController;
     private ReparacionController reparacionController;
     private TallerController tallerController;
     private InformesController informesController;
     private NotificacionesController notificacionesController;
     
-    // Vistas cargadas
+    // views
     private Parent vehiculosView;
     private Parent talleresView;
     private Parent informesView;
@@ -64,13 +64,11 @@ public class RootController {
         }
     }
     
-    /**
-     * Actualiza el contador de notificaciones pendientes
-     */
+    // Actualiza el contador de notificaciones pendientes
     public void actualizarContadorNotificaciones() {
         if (notificacionesController != null && notificacionesContador != null) {
             try {
-                // Obtener el número de notificaciones críticas (km <= 500)
+                // Obtener el número de notificaciones críticas
                 int numNotificaciones = notificacionesController.getNumeroNotificacionesCriticas();
                 
                 // Actualizar el texto del contador
@@ -93,7 +91,7 @@ public class RootController {
     
     private void cargarVistas() {
         try {
-            // Cargar vista de vehículos (que a su vez carga la vista de reparaciones)
+            // Cargar vista de vehículos
             FXMLLoader vehiculosLoader = new FXMLLoader(getClass().getResource("/fxml/VehiculosView.fxml"));
             vehiculosView = vehiculosLoader.load();
             vehiculoController = vehiculosLoader.getController();
@@ -133,7 +131,6 @@ public class RootController {
     }
     
     private void mostrarVistaPrincipal() {
-        // Por defecto, muestra la vista de vehículos y reparaciones
         root.setCenter(vehiculosView);
         tituloSeccionLabel.setText("Vehículos y Reparaciones");
     }

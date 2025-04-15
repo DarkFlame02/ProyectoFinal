@@ -13,14 +13,11 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         try {
-            // Cargar el CSS
             String cssPath = getClass().getResource("/css/css.css").toExternalForm();
             
-            // Cargar la vista de login
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/LoginView.fxml"));
             Parent root = loader.load();
             
-            // Aplicar CSS
             Scene scene = new Scene(root);
             scene.getStylesheets().clear();
             scene.getStylesheets().add(cssPath);
@@ -33,23 +30,16 @@ public class MainApp extends Application {
         }
     }
     
-    /**
-     * Método para cargar la vista principal después del login
-     */
     public static void loadMainView(Stage stage) throws Exception {
         try {
-            // Cargar el CSS
             String cssPath = MainApp.class.getResource("/css/css.css").toExternalForm();
             
-            // Cargar la vista principal
             FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/rootView.fxml"));
             Parent root = loader.load();
             
-            // Configurar el controlador
             RootController controller = loader.getController();
             controller.setPrimaryStage(stage);
             
-            // Aplicar CSS
             Scene scene = new Scene(root);
             scene.getStylesheets().clear();
             scene.getStylesheets().add(cssPath);
@@ -65,7 +55,6 @@ public class MainApp extends Application {
 
     @Override
     public void stop() throws Exception {
-        // Cerrar la conexión a la base de datos al cerrar la aplicación
         DatabaseManager.getInstance().closeConnection();
         super.stop();
     }

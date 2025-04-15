@@ -113,7 +113,6 @@ public class VehiculoController {
         vehiculosData.addAll(vehiculos);
         vehiculosTable.setItems(vehiculosData);
         
-        // Seleccionar el primer vehículo si hay alguno
         if (!vehiculosData.isEmpty()) {
             vehiculosTable.getSelectionModel().select(0);
             if (reparacionController != null) {
@@ -409,9 +408,7 @@ public class VehiculoController {
         });
     }
 
-    /**
-     * Muestra una alerta de información al usuario
-     */
+    // Muestra una alerta de información al usuario
     private void showInfoAlert(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Información");
@@ -420,9 +417,8 @@ public class VehiculoController {
         alert.showAndWait();
     }
     
-    /**
-     * Muestra una alerta de error al usuario
-     */
+    
+    // Muestra una alerta de error al usuario
     private void showErrorAlert(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");

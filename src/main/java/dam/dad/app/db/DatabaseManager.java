@@ -131,7 +131,6 @@ public class DatabaseManager {
                 vehiculo.setKilometros(rs.getInt("kilometros"));
                 vehiculo.setKmMensuales(rs.getInt("km_mensuales"));
                 
-                // Cargar reparaciones del vehículo
                 vehiculo.setReparaciones(getReparacionesByVehiculo(vehiculo.getId()));
                 
                 vehiculos.add(vehiculo);
@@ -162,7 +161,6 @@ public class DatabaseManager {
                 vehiculo.setKilometros(rs.getInt("kilometros"));
                 vehiculo.setKmMensuales(rs.getInt("km_mensuales"));
                 
-                // Cargar reparaciones del vehículo
                 vehiculo.setReparaciones(getReparacionesByVehiculo(vehiculo.getId()));
                 
                 return vehiculo;
@@ -192,7 +190,6 @@ public class DatabaseManager {
                 ResultSet generatedKeys = stmt.getGeneratedKeys();
                 if (generatedKeys.next()) {
                     vehiculo.setId(generatedKeys.getInt(1));
-                    // Generar notificaciones de mantenimiento para el nuevo vehículo
                     generarNotificacionesMantenimiento(vehiculo);
                     return true;
                 }
@@ -219,7 +216,6 @@ public class DatabaseManager {
             
             boolean success = stmt.executeUpdate() > 0;
             if (success) {
-                // Actualizar notificaciones de mantenimiento
                 actualizarNotificacionesMantenimiento(vehiculo);
             }
             return success;
@@ -231,7 +227,6 @@ public class DatabaseManager {
     }
     
     public boolean deleteVehiculo(int vehiculoId) {
-        // Primero eliminamos todas las reparaciones asociadas
         String sqlDeleteReparaciones = "DELETE FROM reparaciones WHERE vehiculo_id = ?";
         
         try (PreparedStatement stmt = connection.prepareStatement(sqlDeleteReparaciones)) {
@@ -242,7 +237,6 @@ public class DatabaseManager {
             return false;
         }
         
-        // Luego eliminamos el vehículo
         String sqlDeleteVehiculo = "DELETE FROM vehiculos WHERE id = ? AND usuario_id = ?";
         
         try (PreparedStatement stmt = connection.prepareStatement(sqlDeleteVehiculo)) {
@@ -365,7 +359,6 @@ public class DatabaseManager {
                 taller.setEspecialidad(rs.getString("especialidad"));
                 taller.setActivo(rs.getBoolean("activo"));
                 
-                // Cargar la valoración media desde la base de datos
                 taller.setValoracionMedia(rs.getDouble("valoracion_media"));
                 
                 talleres.add(taller);
@@ -476,13 +469,11 @@ public class DatabaseManager {
     }
     
     public boolean deleteTaller(int tallerId) {
-        // Verificar si hay reparaciones asociadas a este taller
         String checkSql = "SELECT COUNT(*) FROM reparaciones WHERE taller_id = ?";
         try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
             checkStmt.setInt(1, tallerId);
             ResultSet rs = checkStmt.executeQuery();
             if (rs.next() && rs.getInt(1) > 0) {
-                // Hay reparaciones asociadas, no se puede eliminar
                 return false;
             }
         } catch (SQLException e) {
@@ -490,7 +481,6 @@ public class DatabaseManager {
             return false;
         }
         
-        // Eliminar primero las valoraciones asociadas
         String deleteValoracionesSql = "DELETE FROM valoraciones WHERE taller_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(deleteValoracionesSql)) {
             stmt.setInt(1, tallerId);
@@ -500,7 +490,6 @@ public class DatabaseManager {
             return false;
         }
         
-        // Luego eliminar el taller
         String deleteTallerSql = "DELETE FROM talleres WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(deleteTallerSql)) {
             stmt.setInt(1, tallerId);
@@ -527,7 +516,6 @@ public class DatabaseManager {
                 if (generatedKeys.next()) {
                     valoracion.setId(generatedKeys.getInt(1));
                     
-                    // Actualizar la valoración media del taller
                     actualizarValoracionMedia(valoracion.getTallerId());
                     
                     return true;
@@ -624,7 +612,6 @@ public class DatabaseManager {
                 notificacion.setMantenimientoId(rs.getInt("mantenimiento_id"));
                 notificacion.setKmEstimadosRestantes(rs.getInt("km_estimados_restantes"));
                 
-                // Convertir fecha SQL a LocalDate
                 Date fechaSql = rs.getDate("fecha_estimada");
                 if (fechaSql != null) {
                     notificacion.setFechaEstimada(fechaSql.toLocalDate());
@@ -632,7 +619,6 @@ public class DatabaseManager {
                 
                 notificacion.setEstado(rs.getString("estado"));
                 
-                // Cargar el mantenimiento asociado
                 MantenimientoDefault mantenimiento = new MantenimientoDefault();
                 mantenimiento.setId(rs.getInt("mantenimiento_id"));
                 mantenimiento.setTipo(rs.getString("tipo"));
@@ -655,8 +641,6 @@ public class DatabaseManager {
         List<NotificacionMantenimiento> notificaciones = new ArrayList<>();
         
         try {
-            // Verificar si hay tablas de notificaciones y mantenimientos en la base de datos
-            // Esta consulta es más compatible con diferentes motores de base de datos
             String sql = "SELECT n.*, m.tipo, m.descripcion, m.intervalo_km, m.criticidad, " +
                         "v.marca, v.modelo, v.matricula, v.anio, v.kilometros, v.km_mensuales " +
                         "FROM notificaciones_mantenimiento n " +
@@ -668,7 +652,6 @@ public class DatabaseManager {
             
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 stmt.setInt(1, currentUserId);
-                // Calcular la fecha dentro de 30 días
                 LocalDate fechaLimite = LocalDate.now().plusDays(30);
                 stmt.setDate(2, Date.valueOf(fechaLimite));
                 
@@ -681,7 +664,6 @@ public class DatabaseManager {
                     notificacion.setMantenimientoId(rs.getInt("mantenimiento_id"));
                     notificacion.setKmEstimadosRestantes(rs.getInt("km_estimados_restantes"));
                     
-                    // Convertir fecha SQL a LocalDate
                     Date fechaSql = rs.getDate("fecha_estimada");
                     if (fechaSql != null) {
                         notificacion.setFechaEstimada(fechaSql.toLocalDate());
@@ -689,7 +671,6 @@ public class DatabaseManager {
                     
                     notificacion.setEstado(rs.getString("estado"));
                     
-                    // Cargar el mantenimiento asociado
                     MantenimientoDefault mantenimiento = new MantenimientoDefault();
                     mantenimiento.setId(rs.getInt("mantenimiento_id"));
                     mantenimiento.setTipo(rs.getString("tipo"));
@@ -699,7 +680,6 @@ public class DatabaseManager {
                     
                     notificacion.setMantenimiento(mantenimiento);
                     
-                    // Cargar el vehículo asociado
                     Vehiculo vehiculo = new Vehiculo();
                     vehiculo.setId(rs.getInt("vehiculo_id"));
                     vehiculo.setMarca(rs.getString("marca"));
@@ -740,7 +720,6 @@ public class DatabaseManager {
         return false;
     }
 
-    // Método para generar notificaciones de mantenimiento para un vehículo
     private void generarNotificacionesMantenimiento(Vehiculo vehiculo) {
         try {
             List<MantenimientoDefault> mantenimientos = getAllMantenimientosDefault();
@@ -751,23 +730,19 @@ public class DatabaseManager {
             }
             
             for (MantenimientoDefault mantenimiento : mantenimientos) {
-                // Calcular km restantes hasta el próximo mantenimiento
                 int ultimoMantenimiento = buscarUltimoMantenimiento(vehiculo.getId(), mantenimiento.getTipo());
                 int kmRestantes = mantenimiento.getIntervaloKm() - (vehiculo.getKilometros() - ultimoMantenimiento);
                 
-                // Si los km restantes son negativos, significa que ya se debería haber hecho el mantenimiento
                 if (kmRestantes < 0) {
                     kmRestantes = 0;
                 }
                 
-                // Calcular fecha estimada basada en los km mensuales
                 LocalDate fechaEstimada = null;
                 if (vehiculo.getKmMensuales() > 0) {
                     int mesesEstimados = kmRestantes / vehiculo.getKmMensuales();
                     fechaEstimada = LocalDate.now().plusMonths(mesesEstimados);
                 }
                 
-                // Insertar la notificación
                 String sql = "INSERT INTO notificaciones_mantenimiento (vehiculo_id, mantenimiento_id, km_estimados_restantes, fecha_estimada, estado) " +
                             "VALUES (?, ?, ?, ?, 'Pendiente')";
                 
@@ -794,44 +769,34 @@ public class DatabaseManager {
         }
     }
 
-    // Método para actualizar las notificaciones de mantenimiento de un vehículo
     private void actualizarNotificacionesMantenimiento(Vehiculo vehiculo) {
         try {
-            // Primero obtenemos todas las notificaciones existentes del vehículo
             List<NotificacionMantenimiento> notificaciones = getNotificacionesByVehiculo(vehiculo.getId());
             
-            // Obtenemos todos los mantenimientos por defecto
             List<MantenimientoDefault> todosMantenimientos = getAllMantenimientosDefault();
             
-            // Creamos un conjunto para rastrear los IDs de mantenimientos que ya tienen notificación
             java.util.Set<Integer> mantenimientosConNotificacion = new java.util.HashSet<>();
             
-            // Actualizar las notificaciones existentes
             for (NotificacionMantenimiento notificacion : notificaciones) {
-                // No actualizamos las notificaciones ya completadas
                 if ("Completado".equals(notificacion.getEstado())) {
                     continue;
                 }
                 
                 mantenimientosConNotificacion.add(notificacion.getMantenimientoId());
                 
-                // Recalcular km restantes
                 int ultimoMantenimiento = buscarUltimoMantenimiento(vehiculo.getId(), notificacion.getMantenimiento().getTipo());
                 int kmRestantes = notificacion.getMantenimiento().getIntervaloKm() - (vehiculo.getKilometros() - ultimoMantenimiento);
                 
-                // Si los km restantes son negativos, significa que ya se debería haber hecho el mantenimiento
                 if (kmRestantes < 0) {
                     kmRestantes = 0;
                 }
                 
-                // Calcular fecha estimada actualizada basada en los km mensuales
                 LocalDate fechaEstimada = null;
                 if (vehiculo.getKmMensuales() > 0) {
                     int mesesEstimados = kmRestantes / vehiculo.getKmMensuales();
                     fechaEstimada = LocalDate.now().plusMonths(mesesEstimados);
                 }
                 
-                // Actualizar la notificación
                 String sql = "UPDATE notificaciones_mantenimiento SET km_estimados_restantes = ?, fecha_estimada = ? WHERE id = ?";
                 
                 try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -851,30 +816,24 @@ public class DatabaseManager {
                 }
             }
             
-            // Crear notificaciones para mantenimientos que aún no tienen
             for (MantenimientoDefault mantenimiento : todosMantenimientos) {
-                // Si este mantenimiento ya tiene una notificación, lo saltamos
                 if (mantenimientosConNotificacion.contains(mantenimiento.getId())) {
                     continue;
                 }
                 
-                // Calcular km restantes hasta el próximo mantenimiento
                 int ultimoMantenimiento = buscarUltimoMantenimiento(vehiculo.getId(), mantenimiento.getTipo());
                 int kmRestantes = mantenimiento.getIntervaloKm() - (vehiculo.getKilometros() - ultimoMantenimiento);
                 
-                // Si los km restantes son negativos, significa que ya se debería haber hecho el mantenimiento
                 if (kmRestantes < 0) {
                     kmRestantes = 0;
                 }
                 
-                // Calcular fecha estimada basada en los km mensuales
                 LocalDate fechaEstimada = null;
                 if (vehiculo.getKmMensuales() > 0) {
                     int mesesEstimados = kmRestantes / vehiculo.getKmMensuales();
                     fechaEstimada = LocalDate.now().plusMonths(mesesEstimados);
                 }
                 
-                // Insertar la nueva notificación
                 String sql = "INSERT INTO notificaciones_mantenimiento (vehiculo_id, mantenimiento_id, km_estimados_restantes, fecha_estimada, estado) " +
                             "VALUES (?, ?, ?, ?, 'Pendiente')";
                 
@@ -901,7 +860,6 @@ public class DatabaseManager {
         }
     }
 
-    // Método para buscar el último mantenimiento realizado de un tipo específico
     private int buscarUltimoMantenimiento(int vehiculoId, String tipoMantenimiento) {
         String sql = "SELECT r.*, v.kilometros " +
                     "FROM reparaciones r " +
@@ -915,40 +873,29 @@ public class DatabaseManager {
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
-                // Si encontramos una reparación que coincide con el tipo de mantenimiento,
-                // estimamos los km en el momento de la reparación
                 int kmActuales = rs.getInt("kilometros");
                 
-                // Obtenemos la fecha de la reparación
                 Date fechaReparacion = rs.getDate("fecha_reparacion");
                 
-                // Calculamos los km aproximados en el momento de la reparación
                 return calcularKmEnFecha(vehiculoId, fechaReparacion, kmActuales);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         
-        // Si no hay reparaciones previas de este tipo, asumimos que el vehículo nunca ha tenido este mantenimiento
-        // Por lo tanto, devolvemos 0, lo que significa que el mantenimiento será necesario cuando se alcance el intervalo
         return 0;
     }
 
-    // Método auxiliar para calcular los km aproximados en una fecha determinada
     private int calcularKmEnFecha(int vehiculoId, Date fecha, int kmActuales) {
-        // Obtenemos el vehículo para conocer sus km mensuales
         Vehiculo vehiculo = getVehiculoById(vehiculoId);
         
         if (vehiculo != null && vehiculo.getKmMensuales() > 0) {
-            // Calculamos la diferencia de tiempo entre la fecha actual y la fecha de la reparación
             long diffInDays = ChronoUnit.DAYS.between(fecha.toLocalDate(), LocalDate.now());
             long diffInMonths = diffInDays / 30; // Aproximación de meses
             
-            // Calculamos los km aproximados en el momento de la reparación
             return kmActuales - (int)(diffInMonths * vehiculo.getKmMensuales());
         }
         
-        // Si no podemos calcular, devolvemos los km actuales (asumimos que no ha cambiado)
         return kmActuales;
     }
 } 

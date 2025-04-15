@@ -204,10 +204,6 @@ public class NotificacionesController {
         detallesContainer.setVisible(false);
     }
     
-    /**
-     * Permite establecer una referencia al controlador principal
-     * para poder actualizar el contador de notificaciones
-     */
     public void setRootController(RootController rootController) {
         this.rootController = rootController;
     }
@@ -222,14 +218,12 @@ public class NotificacionesController {
                 rootController.actualizarContadorNotificaciones();
             }
             
-            // Mostrar mensaje de confirmación
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle("Notificación actualizada");
             alert.setHeaderText("Notificación completada");
             alert.setContentText("La notificación de mantenimiento ha sido marcada como completada.");
             alert.showAndWait();
         } else {
-            // Mostrar mensaje de error
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText("Error al actualizar");
@@ -238,19 +232,13 @@ public class NotificacionesController {
         }
     }
     
-    /**
-     * Obtiene el número de notificaciones críticas
-     * (aquellas con kilómetros restantes <= 500)
-     * 
-     * @return Número de notificaciones críticas pendientes
-     */
+    // Obtiene el número de notificaciones críticas
     public int getNumeroNotificacionesCriticas() {
         if (dbManager == null) return 0;
         
         try {
             List<NotificacionMantenimiento> notificacionesUrgentes = dbManager.getNotificacionesPendientes();
             
-            // Filtrar solo las notificaciones realmente urgentes (km restantes <= 500)
             List<NotificacionMantenimiento> notificacionesCriticas = notificacionesUrgentes.stream()
                 .filter(n -> n.getKmEstimadosRestantes() <= 500)
                 .collect(java.util.stream.Collectors.toList());
@@ -267,8 +255,7 @@ public class NotificacionesController {
         if (dbManager != null) {
             try {
                 List<NotificacionMantenimiento> notificacionesUrgentes = dbManager.getNotificacionesPendientes();
-                
-                // Filtrar solo las notificaciones realmente urgentes (km restantes <= 500)
+
                 List<NotificacionMantenimiento> notificacionesCriticas = notificacionesUrgentes.stream()
                     .filter(n -> n.getKmEstimadosRestantes() <= 500)
                     .collect(java.util.stream.Collectors.toList());
@@ -312,7 +299,6 @@ public class NotificacionesController {
                     alert.showAndWait();
                 }
                 
-                // Cargar las notificaciones en la tabla para poder ver todas
                 cargarNotificaciones();
                 
             } catch (Exception e) {
