@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
 
 import dam.dad.app.controller.RootController;
 import dam.dad.app.db.DatabaseManager;
@@ -22,6 +23,7 @@ public class MainApp extends Application {
             scene.getStylesheets().clear();
             scene.getStylesheets().add(cssPath);
             
+            primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/logo.png")));
             primaryStage.setTitle("Gestión de Reparaciones de Vehículos - Login");
             primaryStage.setScene(scene);
             primaryStage.show();
@@ -44,6 +46,7 @@ public class MainApp extends Application {
             scene.getStylesheets().clear();
             scene.getStylesheets().add(cssPath);
             
+            stage.getIcons().add(new Image(MainApp.class.getResourceAsStream("/logo.png")));
             stage.setTitle("Gestión de Reparaciones de Vehículos");
             stage.setScene(scene);
             stage.centerOnScreen();
